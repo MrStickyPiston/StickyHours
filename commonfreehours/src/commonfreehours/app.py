@@ -1,6 +1,7 @@
 """
 Easily check for common free hours in zermelo.
 """
+import datetime
 from enum import Enum
 
 import toga
@@ -26,6 +27,7 @@ class CommonFreeHours(toga.App):
 
         # Main box to hold all widgets
         main_box = toga.Box(style=Pack(direction=COLUMN, padding=10))
+        main_container = toga.ScrollContainer(content=main_box, horizontal=False)
 
         # Zermelo credentials section
         zermelo_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 5)))
@@ -102,19 +104,34 @@ class CommonFreeHours(toga.App):
         # Compute button
         self.compute_button = toga.Button('Compute', on_press=self.compute, style=Pack(padding=(0, 5)))
 
-        # Result label
-        self.result_label = toga.Label('Result will be shown here', style=Pack(padding=(0, 5)))
+        # Result
+        self.result_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 5)))
+
+        result_label = toga.Label('Result will be shown here', style=Pack(padding=(0, 5), flex=1))
+        self.result_box.add(result_label)
+
 
         # Add Compare section to main box
         main_box.add(compare_box)
         main_box.add(self.compute_button)
-        main_box.add(self.result_label)
+        main_box.add(self.result_box)
 
         # Set the main window's content
-        self.main_window.content = main_box
+        self.main_window.content = main_container
         self.main_window.show()
 
     async def compute(self, widget):
+        def is_day_later(date1, date2):
+            # Extract dates without time
+            date1_date_only = date1.date()
+            date2_date_only = date2.date()
+
+            # Calculate the difference between the dates
+            date_diff = date2_date_only - date1_date_only
+
+            # Check if the difference is exactly one day
+            return date_diff >= datetime.timedelta(days=1)
+
         zermelo_school = self.zermelo_school.value
         zermelo_user = self.zermelo_user.value
         zermelo_password = self.zermelo_password.value
@@ -139,13 +156,21 @@ class CommonFreeHours(toga.App):
 
         hours = free_common_hours(schedule, other_schedule)
 
-        self.result_label.text = f"Common free hours ({name1} and {name2}):\n\n"
+        self.result_box.clear()
+
+        self.result_box.add(toga.Label(f"Common free hours ({name1} and {name2}):", style=Pack(padding=(0, 5), font_size=FontSize.big.value)))
+
+        day = datetime.datetime.fromtimestamp(datetime.MINYEAR)
 
         for hour in hours:
+            if is_day_later(day, hour.get('start')):
+                day = hour.get('start')
+                self.result_box.add(toga.Label(hour.get('start').strftime('%A %d %B %Y'), style=Pack(padding=(0, 5), font_size=FontSize.large.value)))
+
             if hour.get('break'):
-                self.result_label.text += f"[BREAK] {hour.get('start')} - {hour.get('end')} ({hour.get('end') - hour.get('start')})\n"
+                self.result_box.add(toga.Label(f"[BREAK] {hour.get('start').strftime('%H:%M')} - {hour.get('end').strftime('%H:%M')} ({hour.get('end') - hour.get('start')})\n", style=Pack(padding=(0, 5), font_size=FontSize.small.value)))
             else:
-                self.result_label.text += f"{hour.get('start')} - {hour.get('end')} ({hour.get('end') - hour.get('start')})\n"
+                self.result_box.add(toga.Label(f"{hour.get('start').strftime('%H:%M')} - {hour.get('end').strftime('%H:%M')} ({hour.get('end') - hour.get('start')})\n", style=Pack(padding=(0, 5), font_size=FontSize.small.value)))
 
 def main():
     return CommonFreeHours()
