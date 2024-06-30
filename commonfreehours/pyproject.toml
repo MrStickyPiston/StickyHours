@@ -21,7 +21,7 @@ test_sources = [
 ]
 
 requires = [
-    "zermeloapi"
+    "requests"
 ]
 test_requires = [
     "pytest",

@@ -1,7 +1,4 @@
-import os
 from datetime import datetime, timedelta
-
-import zermeloapi
 
 MAX_TIME = timedelta(hours=6)
 
@@ -35,7 +32,7 @@ def find_gaps(events):
     return gaps
 
 
-def find_common_gaps(gaps1, gaps2):
+def find_common_gaps(gaps1, gaps2, breaks):
     common_gaps = []
 
     for gap1 in gaps1:
@@ -43,19 +40,23 @@ def find_common_gaps(gaps1, gaps2):
             overlap_start = max(gap1[0], gap2[0])
             overlap_end = min(gap1[1], gap2[1])
             if overlap_start < overlap_end:
-                common_gaps.append((overlap_start, overlap_end))
+                if overlap_end - overlap_start < timedelta(minutes=21):
+                    if breaks:
+                        common_gaps.append((overlap_start, overlap_end))
+                else:
+                    common_gaps.append((overlap_start, overlap_end))
 
     return common_gaps
 
 
-def free_common_hours(schedule1, schedule2):
+def free_common_hours(schedule1, schedule2, breaks):
     events1 = parse_schedule(schedule1)
     events2 = parse_schedule(schedule2)
 
     gaps1 = find_gaps(events1)
     gaps2 = find_gaps(events2)
 
-    common_gaps = find_common_gaps(gaps1, gaps2)
+    common_gaps = find_common_gaps(gaps1, gaps2, breaks)
 
     common_free_hours = []
 
@@ -81,32 +82,3 @@ def free_common_hours(schedule1, schedule2):
             )
 
     return common_free_hours
-
-
-if __name__ == "__main__":
-    zermelo = zermeloapi.zermelo(
-        os.environ.get('ZERMELO_SCHOOL'),
-        os.environ.get('ZERMELO_USER'),
-        os.environ.get('ZERMELO_PW'),
-        teacher=False,
-        version=3
-    )
-
-    account = input("Your account name: ")
-    account_teacher = input('Your account is teacher account (y/n): ').lower().strip() == 'y'
-
-    other_account = input("Other account name: ")
-    other_account_teacher = input('Other account is teacher account (y/n): ').lower().strip() == 'y'
-
-    schedule = zermelo.sort_schedule(username=account, teacher=account_teacher)
-    other_schedule = zermelo.sort_schedule(username=other_account, teacher=other_account_teacher)
-
-    hours = free_common_hours(schedule, other_schedule)
-
-    print("Common free hours found:")
-
-    for hour in hours:
-        if hour.get('break'):
-            print(f"[BREAK] {hour.get('start')} - {hour.get('end')} ({hour.get('end') - hour.get('start')})")
-        else:
-            print(f"{hour.get('start')} - {hour.get('end')} ({hour.get('end') - hour.get('start')})")
