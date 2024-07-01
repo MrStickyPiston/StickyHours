@@ -16,7 +16,8 @@ class zermelo:
     debug = False
     TimeToAddToUtc = 0
 
-    def __init__(self, school, username, password=None, teacher=False, version=3, debug=False, linkcode=None, token_file='./token'):
+    def __init__(self, school, username, password=None, teacher=False, version=3, debug=False, linkcode=None,
+                 token_file='./token'):
         self.school = school
         self.username = username
         self.teacher = teacher
@@ -277,3 +278,75 @@ class zermelo:
         if (readable == None):
             readable = self.readable_schedule(days=days, year=year, week=week, username=username, teacher=teacher)
         print(readable)
+
+    @staticmethod
+    def get_school_year_start(date):
+        year = date.year
+        if date.month < 9:
+            return year - 1
+        else:
+            return year
+
+    def getSchoolInSchoolYears(self):
+        url = f"https://cvo-nf.zportal.nl/api/v3/users/~me?access_token={self.token}&fields=code,displayName,schoolInSchoolYears"
+
+        if self.debug:
+            print(url)
+        rawr = requests.get(url)
+        if self.debug:
+            print(rawr)
+        rl = json.loads(rawr.text)
+
+        if rl.get('response', {}).get('status') == 401:
+            raise ValueError('Zermelo authentication error')
+
+        return rl.get('response').get('data')[0].get('schoolInSchoolYears')
+
+    def getSchoolInSchoolYear(self, schoolInSchoolYears):
+        school_year = self.get_school_year_start(datetime.datetime.now())
+        url = f"https://cvo-nf.zportal.nl/api/v3/schoolfunctionsettings?access_token={self.token}&archived=false&schoolInSchoolYear={",".join(map(str, schoolInSchoolYears))}&year={school_year}&fields=schoolInSchoolYear"
+        rawr = requests.get(url)
+        if self.debug:
+            print(rawr)
+        rl = json.loads(rawr.text)
+
+        if rl.get('response', {}).get('status') != 200:
+            raise ValueError('Zermelo authentication error')
+
+        return rl.get('response').get('data')[0].get('schoolInSchoolYear')
+
+    def getStudents(self, schoolInSchoolYear):
+        school_year = self.get_school_year_start(datetime.datetime.now())
+        url = f"https://cvo-nf.zportal.nl/api/v3/studentsindepartments?access_token={self.token}&schoolInSchoolYear={schoolInSchoolYear}&fields=student,firstName,prefix,lastName,mainGroupName,mainGroup,mentorGroup,departmentOfBranch"
+        rawr = requests.get(url)
+        if self.debug:
+            print(rawr)
+        rl = json.loads(rawr.text)
+
+        if rl.get('response', {}).get('status') != 200:
+            raise ValueError('Zermelo error')
+
+        return rl.get('response').get('data')
+
+    def getTeachers(self, schoolInSchoolYear):
+        school_year = self.get_school_year_start(datetime.datetime.now())
+        url = f"https://cvo-nf.zportal.nl/api/v3/contracts?access_token={self.token}&schoolInSchoolYear={schoolInSchoolYear}&fields=employee,prefix,lastName,schoolInSchoolYear,mainBranchOfSchool"
+        rawr = requests.get(url)
+        if self.debug:
+            print(rawr)
+        rl = json.loads(rawr.text)
+
+        if rl.get('response', {}).get('status') != 200:
+            raise ValueError('Zermelo error')
+
+        return rl.get('response').get('data')
+
+    def getAccounts(self, schoolInSchoolYear):
+        raw_students = self.getStudents(schoolInSchoolYear)
+        raw_teachers = self.getTeachers(schoolInSchoolYear)
+
+        accounts = []
+
+        print(raw_students)
+        print(raw_teachers)
+        pass

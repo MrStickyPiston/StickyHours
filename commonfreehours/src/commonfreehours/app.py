@@ -159,6 +159,10 @@ class CommonFreeHours(toga.App):
 
     def main(self):
         self.main_window.title = "CommonFreeHours"
+
+        schoolInSchoolYear = self.zermelo.getSchoolInSchoolYear(self.zermelo.getSchoolInSchoolYears())
+        self.zermelo.getAccounts(schoolInSchoolYear)
+
         self.main_window.content = self.main_container
 
     def login_setup(self):
@@ -219,6 +223,7 @@ class CommonFreeHours(toga.App):
     async def login(self, widget):
         if self.zermelo_school.value == '' or self.zermelo_user.value == '' or self.zermelo_password.value == '':
             await self.main_window.error_dialog('Authentication failed', 'Please fill in all fields and try again.')
+            return
 
         print(f"Logging in as {self.zermelo_user.value} on {self.zermelo_school.value} with teacher={self.zermelo_teacher.value}")
 
@@ -259,8 +264,6 @@ class CommonFreeHours(toga.App):
 
     async def compute(self, widget):
 
-        print(self.zermelo.token, self.zermelo.school, self.zermelo.username)
-
         def is_day_later(date1, date2):
             # Extract dates without time
             date1_date_only = date1.date()
@@ -283,6 +286,7 @@ class CommonFreeHours(toga.App):
         try:
             schedule = self.zermelo.sort_schedule(username=name1, teacher=is_teacher1)
             other_schedule = self.zermelo.sort_schedule(username=name2, teacher=is_teacher2)
+
         except ValueError:
             # If zermelo auth expired
             pathlib.Path(self.paths.data / 'ZToken').unlink(missing_ok=True)
