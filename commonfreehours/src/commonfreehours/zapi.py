@@ -147,6 +147,10 @@ class zermelo:
         if self.debug:
             print(rawr)
         rl = json.loads(rawr.text)
+
+        if rl.get('response', {}).get('status') == 401:
+            raise ValueError('Zermelo authentication error')
+
         return rl
 
     def get_schedule(self, rawschedule: dict = None, year=None, week=None, username=None, teacher=None):

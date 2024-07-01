@@ -45,9 +45,10 @@ class CommonFreeHours(toga.App):
 
         self.user_config = self.config['user']
 
+        self.login_setup()
         self.main_setup()
 
-        if self.user_config.get('school') is None or self.user_config.get('user') is None:
+        if self.user_config.get('school') is None or self.user_config.get('account_name') is None:
             self.login_setup()
             self.login_view()
         else:
@@ -55,18 +56,21 @@ class CommonFreeHours(toga.App):
                 self.zermelo = zapi.zermelo(
                     self.user_config.get('school'),
                     self.user_config.get('account_name'),
-                    teacher=self.user_config.get('is_teacher'),
+                    teacher=self.user_config.get('teacher'),
                     version=3,
                     token_file=self.paths.data / 'ZToken'
                 )
 
-                if self.zermelo.get_raw_schedule().get('response', {}).get('status', 401) == 401:
+                try:
+                    self.zermelo.get_raw_schedule()
+                    print(
+                        f"Used existing zermelo instance as {self.user_config.get('account_name')} on {self.user_config.get('school')} with teacher={self.user_config.get('teacher')}")
+                    self.main()
+                except ValueError:
+                    # If zermelo auth expired
                     pathlib.Path(self.paths.data / 'ZToken').unlink(missing_ok=True)
                     pathlib.Path(self.paths.data / 'commonFreeHours.ini').unlink(missing_ok=True)
-                    self.login_setup()
                     self.login_view()
-                else:
-                    self.main()
             except (
                     binascii.Error,  #
                     ValueError,  # For incorrect config file no token
@@ -154,6 +158,7 @@ class CommonFreeHours(toga.App):
         main_box.add(self.result_box)
 
     def main(self):
+        self.main_window.title = "CommonFreeHours"
         self.main_window.content = self.main_container
 
     def login_setup(self):
@@ -205,17 +210,17 @@ class CommonFreeHours(toga.App):
     def login_view(self):
         self.main_window.title = "Login - CommonFreeHours"
 
+        self.zermelo_school.value = self.user_config.get('school')
+        self.zermelo_user.value = self.user_config.get('account_name')
+        self.zermelo_teacher.value = self.user_config.get('teacher')
+
         self.main_window.content = self.login_box
 
     async def login(self, widget):
-        if self.zermelo_school.value == '':
-            return
-        elif self.zermelo_user.value == '':
-            return
-        elif self.zermelo_password.value == '':
-            return
+        if self.zermelo_school.value == '' or self.zermelo_user.value == '' or self.zermelo_password.value == '':
+            await self.main_window.error_dialog('Authentication failed', 'Please fill in all fields and try again.')
 
-        print(self.zermelo_school.value)
+        print(f"Logging in as {self.zermelo_user.value} on {self.zermelo_school.value} with teacher={self.zermelo_teacher.value}")
 
         try:
             zermelo = zapi.zermelo(
@@ -231,8 +236,12 @@ class CommonFreeHours(toga.App):
             self.user_config['account_name'] = self.zermelo_user.value
             self.user_config['teacher'] = str(self.zermelo_teacher.value)
 
+            print("Logged in successfully")
+
             with open(self.paths.data / 'commonFreeHours.ini', 'w') as f:
                 self.config.write(f)
+
+            print("Saved config")
 
             self.zermelo = zapi.zermelo(
                 self.user_config.get('school'),
@@ -241,6 +250,8 @@ class CommonFreeHours(toga.App):
                 version=3,
                 token_file=self.paths.data / 'ZToken'
             )
+
+            print(f"Created new zermelo instance as {self.zermelo_user.value} on {self.zermelo_school.value} with teacher={self.zermelo_teacher.value}")
 
             self.main()
         except ValueError:
@@ -269,8 +280,16 @@ class CommonFreeHours(toga.App):
 
         show_breaks = self.show_breaks.value
 
-        schedule = self.zermelo.sort_schedule(username=name1, teacher=is_teacher1)
-        other_schedule = self.zermelo.sort_schedule(username=name2, teacher=is_teacher2)
+        try:
+            schedule = self.zermelo.sort_schedule(username=name1, teacher=is_teacher1)
+            other_schedule = self.zermelo.sort_schedule(username=name2, teacher=is_teacher2)
+        except ValueError:
+            # If zermelo auth expired
+            pathlib.Path(self.paths.data / 'ZToken').unlink(missing_ok=True)
+            pathlib.Path(self.paths.data / 'commonFreeHours.ini').unlink(missing_ok=True)
+            await self.main_window.info_dialog('Session expired', 'Please log in again.')
+            self.login_view()
+            return
 
         if not schedule:
             await self.main_window.error_dialog('No schedule found', 'No schedule found for user 1.')
