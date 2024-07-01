@@ -1,11 +1,16 @@
 """
 Easily check for common free hours in zermelo.
 """
+import binascii
 import datetime
+import pathlib
 from enum import Enum
 
 import toga
 import configparser
+
+import urllib3.exceptions
+
 from commonfreehours import zapi
 from toga.style import Pack
 from toga.style.pack import COLUMN, ROW
@@ -42,19 +47,35 @@ class CommonFreeHours(toga.App):
 
         if self.user_config.get('school') is None or self.user_config.get('user') is None:
             self.login_setup()
-            self.login()
+            self.login_view()
         else:
-            self.zermelo = zapi.zermelo(
-                self.user_config.get('school'),
-                self.user_config.get('account_name'),
-                teacher=self.user_config.get('is_teacher'),
-                version=3,
-                token_file=self.paths.data / 'ZToken'
-            )
+            try:
+                self.zermelo = zapi.zermelo(
+                    self.user_config.get('school'),
+                    self.user_config.get('account_name'),
+                    teacher=self.user_config.get('is_teacher'),
+                    version=3,
+                    token_file=self.paths.data / 'ZToken'
+                )
 
+                if self.zermelo.get_raw_schedule().get('response', {}).get('status', 401) == 401:
+                    pathlib.Path(self.paths.data / 'ZToken').unlink(missing_ok=True)
+                    pathlib.Path(self.paths.data / 'commonFreeHours.ini').unlink(missing_ok=True)
+                    self.login_setup()
+                    self.login_view()
+                else:
+                    self.main_setup()
+                    self.main()
+            except (
+                    binascii.Error,                             #
+                    ValueError,                                 # For incorrect config file no token
+                    urllib3.exceptions.LocationParseError       # Catch zermelo 404
+            ):
+                pathlib.Path(self.paths.data / 'ZToken').unlink(missing_ok=True)
+                pathlib.Path(self.paths.data / 'commonFreeHours.ini').unlink(missing_ok=True)
+                self.login_setup()
+                self.login_view()
             # Set the main window's content
-            self.main_setup()
-            self.main()
 
         self.main_window.show()
 
@@ -63,45 +84,6 @@ class CommonFreeHours(toga.App):
         # Main box to hold all widgets
         main_box = toga.Box(style=Pack(direction=COLUMN, padding=10))
         self.main_container = toga.ScrollContainer(content=main_box, horizontal=False)
-
-        # Zermelo credentials section
-        zermelo_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 5)))
-        zermelo_box.add(
-            toga.Label('Zermelo Credentials', style=Pack(padding=(0, 5, 10, 5), font_size=FontSize.big.value)))
-
-        # Zermelo school
-        self.zermelo_school = toga.TextInput(style=Pack(flex=1, padding=(0, 5)))
-        zermelo_school_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 5)))
-        zermelo_school_box.add(
-            toga.Label('Zermelo school: (organization):', style=Pack(padding=(0, 5), font_size=FontSize.small.value)))
-        zermelo_school_box.add(self.zermelo_school)
-        zermelo_box.add(zermelo_school_box)
-
-        # Zermelo user
-        self.zermelo_user = toga.TextInput(style=Pack(flex=1, padding=(0, 5)))
-        zermelo_user_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 5)))
-        zermelo_user_box.add(
-            toga.Label('Zermelo account name:', style=Pack(padding=(0, 5), font_size=FontSize.small.value)))
-        zermelo_user_box.add(self.zermelo_user)
-        zermelo_box.add(zermelo_user_box)
-
-        # Zermelo password
-        self.zermelo_password = toga.PasswordInput(style=Pack(flex=1, padding=(0, 5)))
-        zermelo_password_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 5)))
-        zermelo_password_box.add(
-            toga.Label('Zermelo account password:', style=Pack(padding=(0, 5), font_size=FontSize.small.value)))
-        zermelo_password_box.add(self.zermelo_password)
-        zermelo_box.add(zermelo_password_box)
-
-        self.zermelo_teacher = toga.Switch('', style=Pack(padding=(0, 5), font_size=FontSize.large.value))
-        is_teacherz_box = toga.Box(style=Pack(direction=ROW, padding=(0, 5)))
-        is_teacherz_box.add(
-            toga.Label('Account is a teacher account:', style=Pack(padding=(0, 5), font_size=FontSize.small.value)))
-        is_teacherz_box.add(self.zermelo_teacher)
-        zermelo_box.add(is_teacherz_box)
-
-        # Add Zermelo section to main box
-        main_box.add(zermelo_box)
 
         # Compare section
         compare_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 5)))
@@ -176,9 +158,79 @@ class CommonFreeHours(toga.App):
     def login_setup(self):
         self.login_box = toga.Box(style=Pack(direction=COLUMN, padding=10))
 
-    def login(self):
+        # Zermelo credentials section
+        zermelo_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 5)))
+        zermelo_box.add(
+            toga.Label('Zermelo Credentials', style=Pack(padding=(0, 5, 10, 5), font_size=FontSize.big.value)))
+
+        # Zermelo school
+        self.zermelo_school = toga.TextInput(style=Pack(flex=1, padding=(0, 5)))
+        zermelo_school_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 5)))
+        zermelo_school_box.add(
+            toga.Label('Zermelo school: (organization):', style=Pack(padding=(0, 5), font_size=FontSize.small.value)))
+        zermelo_school_box.add(self.zermelo_school)
+        zermelo_box.add(zermelo_school_box)
+
+        # Zermelo user
+        self.zermelo_user = toga.TextInput(style=Pack(flex=1, padding=(0, 5)))
+        zermelo_user_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 5)))
+        zermelo_user_box.add(
+            toga.Label('Zermelo account name:', style=Pack(padding=(0, 5), font_size=FontSize.small.value)))
+        zermelo_user_box.add(self.zermelo_user)
+        zermelo_box.add(zermelo_user_box)
+
+        # Zermelo password
+        self.zermelo_password = toga.PasswordInput(style=Pack(flex=1, padding=(0, 5)))
+        zermelo_password_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 5)))
+        zermelo_password_box.add(
+            toga.Label('Zermelo account password:', style=Pack(padding=(0, 5), font_size=FontSize.small.value)))
+        zermelo_password_box.add(self.zermelo_password)
+        zermelo_box.add(zermelo_password_box)
+
+        self.zermelo_teacher = toga.Switch('', style=Pack(padding=(0, 5), font_size=FontSize.large.value))
+        is_teacherz_box = toga.Box(style=Pack(direction=ROW, padding=(0, 5)))
+        is_teacherz_box.add(
+            toga.Label('Account is a teacher account:', style=Pack(padding=(0, 5), font_size=FontSize.small.value)))
+        is_teacherz_box.add(self.zermelo_teacher)
+        zermelo_box.add(is_teacherz_box)
+
+        self.login_button = toga.Button('Login', on_press=self.login, style=Pack(padding=(0, 5)))
+
+
+        # Add Zermelo section to main box
+        self.login_box.add(zermelo_box)
+
+        self.login_box.add(self.login_button)
+
+    def login_view(self):
         self.main_window.title = "Login - CommonFreeHours"
+
         self.main_window.content = self.login_box
+
+    async def login(self, widget):
+        if self.zermelo_school.value == '':
+            return
+        elif self.zermelo_user.value == '':
+            return
+        elif self.zermelo_password.value == '':
+            return
+
+        self.zermelo = zapi.zermelo(
+            self.zermelo_school.value,
+            self.zermelo_user.value,
+            teacher=self.zermelo_teacher.value,
+            password=self.zermelo_password.value,
+            version=3,
+            token_file=self.paths.data / 'ZToken'
+        )
+
+        self.user_config['school'] = self.zermelo_school.value
+        self.user_config['user'] = self.zermelo_user.value
+        self.user_config['teacher'] = str(self.zermelo_teacher.value)
+
+        with open(self.paths.data / 'commonFreeHours.ini', 'w') as f:
+            self.config.write(f)
+
 
     async def compute(self, widget):
         def is_day_later(date1, date2):
@@ -192,11 +244,6 @@ class CommonFreeHours(toga.App):
             # Check if the difference is exactly one day
             return date_diff >= datetime.timedelta(days=1)
 
-        zermelo_school = self.zermelo_school.value
-        zermelo_user = self.zermelo_user.value
-        zermelo_password = self.zermelo_password.value
-        zermelo_is_teacher = self.zermelo_teacher.value
-
         name1 = self.name1_input.value
         is_teacher1 = self.is_teacher1.value
 
@@ -205,8 +252,8 @@ class CommonFreeHours(toga.App):
 
         show_breaks = self.show_breaks.value
 
-        schedule = zermelo.sort_schedule(username=name1, teacher=is_teacher1)
-        other_schedule = zermelo.sort_schedule(username=name2, teacher=is_teacher2)
+        schedule = self.zermelo.sort_schedule(username=name1, teacher=is_teacher1)
+        other_schedule = self.zermelo.sort_schedule(username=name2, teacher=is_teacher2)
 
         hours = free_common_hours(schedule, other_schedule, show_breaks)
 

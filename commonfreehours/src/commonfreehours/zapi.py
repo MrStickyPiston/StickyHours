@@ -32,7 +32,7 @@ class zermelo:
 
     def gettokenfromlinkcode(self, linkcode=None):
         if linkcode == None:
-            linkcode = input("apitoken: ").replace(" ", '')
+            raise ValueError('Incorrect linkcode')
         else:
             linkcode = str(linkcode).replace(" ", '')
         return json.loads(requests.post(
@@ -107,7 +107,7 @@ class zermelo:
         with open(self.token_file) as f:
             filevalue = f.read()
 
-        print(f'wrote token to path: {self.token_file}')
+        print(f'read token from path: {self.token_file}')
 
         return str(base64.b64decode(filevalue))[2:-1]
 
