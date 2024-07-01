@@ -45,6 +45,8 @@ class CommonFreeHours(toga.App):
 
         self.user_config = self.config['user']
 
+        self.main_setup()
+
         if self.user_config.get('school') is None or self.user_config.get('user') is None:
             self.login_setup()
             self.login_view()
@@ -64,12 +66,11 @@ class CommonFreeHours(toga.App):
                     self.login_setup()
                     self.login_view()
                 else:
-                    self.main_setup()
                     self.main()
             except (
-                    binascii.Error,                             #
-                    ValueError,                                 # For incorrect config file no token
-                    urllib3.exceptions.LocationParseError       # Catch zermelo 404
+                    binascii.Error,  #
+                    ValueError,  # For incorrect config file no token
+                    urllib3.exceptions.LocationParseError  # Catch zermelo 404
             ):
                 pathlib.Path(self.paths.data / 'ZToken').unlink(missing_ok=True)
                 pathlib.Path(self.paths.data / 'commonFreeHours.ini').unlink(missing_ok=True)
@@ -196,7 +197,6 @@ class CommonFreeHours(toga.App):
 
         self.login_button = toga.Button('Login', on_press=self.login, style=Pack(padding=(0, 5)))
 
-
         # Add Zermelo section to main box
         self.login_box.add(zermelo_box)
 
@@ -215,24 +215,41 @@ class CommonFreeHours(toga.App):
         elif self.zermelo_password.value == '':
             return
 
-        self.zermelo = zapi.zermelo(
-            self.zermelo_school.value,
-            self.zermelo_user.value,
-            teacher=self.zermelo_teacher.value,
-            password=self.zermelo_password.value,
-            version=3,
-            token_file=self.paths.data / 'ZToken'
-        )
+        print(self.zermelo_school.value)
 
-        self.user_config['school'] = self.zermelo_school.value
-        self.user_config['user'] = self.zermelo_user.value
-        self.user_config['teacher'] = str(self.zermelo_teacher.value)
+        try:
+            zermelo = zapi.zermelo(
+                school=self.zermelo_school.value,
+                username=self.zermelo_user.value,
+                teacher=self.zermelo_teacher.value,
+                password=self.zermelo_password.value,
+                version=3,
+                token_file=self.paths.data / 'ZToken',
+            )
 
-        with open(self.paths.data / 'commonFreeHours.ini', 'w') as f:
-            self.config.write(f)
+            self.user_config['school'] = self.zermelo_school.value
+            self.user_config['account_name'] = self.zermelo_user.value
+            self.user_config['teacher'] = str(self.zermelo_teacher.value)
 
+            with open(self.paths.data / 'commonFreeHours.ini', 'w') as f:
+                self.config.write(f)
+
+            self.zermelo = zapi.zermelo(
+                self.user_config.get('school'),
+                self.user_config.get('account_name'),
+                teacher=self.user_config.get('is_teacher'),
+                version=3,
+                token_file=self.paths.data / 'ZToken'
+            )
+
+            self.main()
+        except ValueError:
+            await self.main_window.error_dialog('Authentication failed', 'Please try again.')
 
     async def compute(self, widget):
+
+        print(self.zermelo.token, self.zermelo.school, self.zermelo.username)
+
         def is_day_later(date1, date2):
             # Extract dates without time
             date1_date_only = date1.date()
@@ -254,6 +271,13 @@ class CommonFreeHours(toga.App):
 
         schedule = self.zermelo.sort_schedule(username=name1, teacher=is_teacher1)
         other_schedule = self.zermelo.sort_schedule(username=name2, teacher=is_teacher2)
+
+        if not schedule:
+            await self.main_window.error_dialog('No schedule found', 'No schedule found for user 1.')
+            return
+        if not other_schedule:
+            await self.main_window.error_dialog('No schedule found', 'No schedule found for user 2.')
+            return
 
         hours = free_common_hours(schedule, other_schedule, show_breaks)
 

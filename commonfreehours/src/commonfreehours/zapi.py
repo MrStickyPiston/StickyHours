@@ -44,8 +44,7 @@ class zermelo:
             school = self.school
         if (username == None):
             username = self.username
-        if (password == None):
-            password = self.password
+
         url = 'https://' + school + '.zportal.nl/api/' + self.version + '/oauth'
         myobj = {'username': username, 'password': password, 'client_id': 'OAuthPage', 'redirect_uri': '/main/',
                  'scope': '', 'state': '4E252A', 'response_type': 'code', 'tenant': school}
@@ -79,7 +78,7 @@ class zermelo:
             token = self.get_token()
         if self.debug:
             print(token)
-        url = 'https://' + school + '.zportal.nl/api/' + self.version + '/oauth/token'
+        url = f'https://{self.school}.zportal.nl/api/{self.version}/oauth/token'
         myobj = {'code': token, 'client_id': 'ZermeloPortal', 'client_secret': 42,
                  'grant_type': 'authorization_code', 'rememberMe': False}
         if self.debug:
@@ -90,11 +89,15 @@ class zermelo:
         if self.debug:
             print(l.text)
         jl = json.loads(l.text)
-        token = jl['access_token']
+
+        try:
+            token = jl['access_token']
+        except KeyError:
+            raise ValueError('Error during auth')
 
         self.settokentofile(token)
 
-        return (token)
+        return token
 
     def gettokenfromfile(self, linkcode=None, password=None):
         if not os.path.exists(self.token_file):
