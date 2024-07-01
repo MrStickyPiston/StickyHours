@@ -26,6 +26,8 @@ class FontSize(Enum):
 class CommonFreeHours(toga.App):
     def __init__(self):
         super().__init__()
+        self.main_loaded = False
+        self.accounts = []
 
     def startup(self):
         # Main window of the application
@@ -46,7 +48,6 @@ class CommonFreeHours(toga.App):
         self.user_config = self.config['user']
 
         self.login_setup()
-        self.main_setup()
 
         if self.user_config.get('school') is None or self.user_config.get('account_name') is None:
             self.login_setup()
@@ -62,7 +63,12 @@ class CommonFreeHours(toga.App):
                 )
 
                 try:
-                    self.zermelo.get_raw_schedule()
+                    self.schoolInSchoolYear = self.zermelo.getSchoolInSchoolYear(self.zermelo.getSchoolInSchoolYears())
+                    self.accounts = self.zermelo.getAccounts(self.schoolInSchoolYear)
+
+                    self.main_setup()
+                    self.main_loaded = True
+
                     print(
                         f"Used existing zermelo instance as {self.user_config.get('account_name')} on {self.user_config.get('school')} with teacher={self.user_config.get('teacher')}")
                     self.main()
@@ -84,6 +90,14 @@ class CommonFreeHours(toga.App):
 
         self.main_window.show()
 
+    async def on_change_query_1(self, widget: toga.TextInput):
+        options = [option for option in self.accounts if widget.value.lower() in option.get('name').lower()]
+        self.name1_selection.items = options
+
+    async def on_change_query_2(self, widget: toga.TextInput):
+        options = [option for option in self.accounts if widget.value.lower() in option.get('name').lower()]
+        self.name2_selection.items = options
+
     def main_setup(self):
 
         # Main box to hold all widgets
@@ -97,36 +111,48 @@ class CommonFreeHours(toga.App):
         # Account name 1
         account1_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 0, 10, 0)))
 
-        self.name1_input = toga.TextInput(style=Pack(flex=1, padding=(0, 5)))
         name1_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 5)))
-        name1_box.add(toga.Label('Account 1', style=Pack(padding=(0, 5), font_size=FontSize.large.value)))
-        name1_box.add(self.name1_input)
-        account1_box.add(name1_box)
 
-        self.is_teacher1 = toga.Switch('', style=Pack(padding=(0, 5), font_size=FontSize.large.value))
-        is_teacher1_box = toga.Box(style=Pack(direction=ROW, padding=(0, 5)))
-        is_teacher1_box.add(
-            toga.Label('Account 1 is a teacher account:', style=Pack(padding=(0, 5), font_size=FontSize.small.value)))
-        is_teacher1_box.add(self.is_teacher1)
-        account1_box.add(is_teacher1_box)
+        name1_box.add(toga.Label('Account 1', style=Pack(padding=(0, 5), font_size=FontSize.large.value)))
+
+        self.name1_input = toga.TextInput(
+            style=Pack(flex=1, padding=(0, 5)),
+            on_change=self.on_change_query_1
+        )
+
+        name1_box.add(toga.Label('Search accounts', style=Pack(padding=(0, 5), font_size=FontSize.small.value)))
+
+        name1_box.add(self.name1_input)
+
+        self.name1_selection = toga.Selection(items=self.accounts,
+                                              accessor='name',
+                                              style=Pack(flex=1, padding=(0, 5)))
+        name1_box.add(self.name1_selection)
+        account1_box.add(name1_box)
 
         compare_box.add(account1_box)
 
         # Account name 2
         account2_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 0, 10, 0)))
 
-        self.name2_input = toga.TextInput(style=Pack(flex=1, padding=(0, 5)))
         name2_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 5)))
-        name2_box.add(toga.Label('Account 2', style=Pack(padding=(0, 5), font_size=FontSize.large.value)))
-        name2_box.add(self.name2_input)
-        account2_box.add(name2_box)
 
-        self.is_teacher2 = toga.Switch('', style=Pack(padding=(0, 5), font_size=FontSize.large.value))
-        is_teacher2_box = toga.Box(style=Pack(direction=ROW, padding=(0, 5)))
-        is_teacher2_box.add(
-            toga.Label('Account 2 is a teacher account:', style=Pack(padding=(0, 5), font_size=FontSize.small.value)))
-        is_teacher2_box.add(self.is_teacher2)
-        account2_box.add(is_teacher2_box)
+        name2_box.add(toga.Label('Account 2', style=Pack(padding=(0, 5), font_size=FontSize.large.value)))
+
+        self.name2_input = toga.TextInput(
+            style=Pack(flex=1, padding=(0, 5)),
+            on_change=self.on_change_query_2
+        )
+
+        name2_box.add(toga.Label('Search accounts', style=Pack(padding=(0, 5), font_size=FontSize.small.value)))
+
+        name2_box.add(self.name2_input)
+
+        self.name2_selection = toga.Selection(items=self.accounts,
+                                              accessor='name',
+                                              style=Pack(flex=1, padding=(0, 5)))
+        name2_box.add(self.name2_selection)
+        account2_box.add(name2_box)
 
         compare_box.add(account2_box)
 
@@ -159,9 +185,6 @@ class CommonFreeHours(toga.App):
 
     def main(self):
         self.main_window.title = "CommonFreeHours"
-
-        schoolInSchoolYear = self.zermelo.getSchoolInSchoolYear(self.zermelo.getSchoolInSchoolYears())
-        self.zermelo.getAccounts(schoolInSchoolYear)
 
         self.main_window.content = self.main_container
 
@@ -225,7 +248,8 @@ class CommonFreeHours(toga.App):
             await self.main_window.error_dialog('Authentication failed', 'Please fill in all fields and try again.')
             return
 
-        print(f"Logging in as {self.zermelo_user.value} on {self.zermelo_school.value} with teacher={self.zermelo_teacher.value}")
+        print(
+            f"Logging in as {self.zermelo_user.value} on {self.zermelo_school.value} with teacher={self.zermelo_teacher.value}")
 
         try:
             zermelo = zapi.zermelo(
@@ -256,7 +280,15 @@ class CommonFreeHours(toga.App):
                 token_file=self.paths.data / 'ZToken'
             )
 
-            print(f"Created new zermelo instance as {self.zermelo_user.value} on {self.zermelo_school.value} with teacher={self.zermelo_teacher.value}")
+            print(
+                f"Created new zermelo instance as {self.zermelo_user.value} on {self.zermelo_school.value} with teacher={self.zermelo_teacher.value}")
+
+            if not self.main_loaded:
+                self.schoolInSchoolYear = self.zermelo.getSchoolInSchoolYear(self.zermelo.getSchoolInSchoolYears())
+                self.accounts = self.zermelo.getAccounts(self.schoolInSchoolYear)
+
+                self.main_setup()
+                self.main_loaded = True
 
             self.main()
         except ValueError:
@@ -275,17 +307,15 @@ class CommonFreeHours(toga.App):
             # Check if the difference is exactly one day
             return date_diff >= datetime.timedelta(days=1)
 
-        name1 = self.name1_input.value
-        is_teacher1 = self.is_teacher1.value
+        account1 = self.name1_selection.value
 
-        name2 = self.name2_input.value
-        is_teacher2 = self.is_teacher2.value
+        account2 = self.name2_selection.value
 
         show_breaks = self.show_breaks.value
 
         try:
-            schedule = self.zermelo.sort_schedule(username=name1, teacher=is_teacher1)
-            other_schedule = self.zermelo.sort_schedule(username=name2, teacher=is_teacher2)
+            schedule = self.zermelo.sort_schedule(username=account1.id, teacher=account1.teacher)
+            other_schedule = self.zermelo.sort_schedule(username=account2.id, teacher=account2.teacher)
 
         except ValueError:
             # If zermelo auth expired
@@ -308,7 +338,7 @@ class CommonFreeHours(toga.App):
 
         self.result_box.add(toga.Label(f"Common free hours:", style=Pack(padding=(0, 5), font_size=FontSize.big.value)))
         self.result_box.add(
-            toga.Label(f"Account 1: {name1}\nAccount 2: {name2}\nBreaks shown: {'yes' if show_breaks else 'no'}",
+            toga.Label(f"Account 1: {account1.name}\nAccount 2: {account2.name}\nBreaks shown: {'yes' if show_breaks else 'no'}",
                        style=Pack(padding=(0, 5), font_size=FontSize.small.value)))
 
         day = datetime.datetime.fromtimestamp(datetime.MINYEAR)

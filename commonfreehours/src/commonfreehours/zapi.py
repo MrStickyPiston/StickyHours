@@ -347,6 +347,13 @@ class zermelo:
 
         accounts = []
 
-        print(raw_students)
-        print(raw_teachers)
-        pass
+        for teacher in raw_teachers:
+            name = f"{teacher['prefix']} {teacher['lastName']}" if teacher['prefix'] else f"{teacher['lastName']}"
+            accounts.append({"name": f"{name} ({teacher['employee']})", "id": teacher['employee'], 'teacher': True})
+
+        # Process the student list
+        for student in raw_students:
+            name = f"{student['firstName']} {student['prefix']} {student['lastName']}" if student['prefix'] else f"{student['firstName']} {student['lastName']}"
+            accounts.append({"name": f"{name} ({student['student']})", "id": student['student'], 'teacher': False})
+
+        return accounts
