@@ -26,7 +26,9 @@ def find_gaps(events):
         if current_start_time > last_end_time:
             gap_start = last_end_time
             gap_end = current_start_time
-            gaps.append((gap_start, gap_end))
+            gap_duration = gap_end - gap_start
+            if gap_duration <= MAX_TIME:
+                gaps.append((gap_start, gap_end))
         last_end_time = max(last_end_time, datetime.strptime(event[2], '%Y-%m-%d %H:%M'))
 
     return gaps
