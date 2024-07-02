@@ -75,7 +75,7 @@ class CommonFreeHours(toga.App):
                 except ValueError:
                     # If zermelo auth expired
                     pathlib.Path(self.paths.data / 'ZToken').unlink(missing_ok=True)
-                    pathlib.Path(self.paths.data / 'commonFreeHours.ini').unlink(missing_ok=True)
+                    #pathlib.Path(self.paths.data / 'commonFreeHours.ini').unlink(missing_ok=True)
                     self.login_view()
             except (
                     binascii.Error,  #
@@ -83,7 +83,7 @@ class CommonFreeHours(toga.App):
                     urllib3.exceptions.LocationParseError  # Catch zermelo 404
             ):
                 pathlib.Path(self.paths.data / 'ZToken').unlink(missing_ok=True)
-                pathlib.Path(self.paths.data / 'commonFreeHours.ini').unlink(missing_ok=True)
+                #pathlib.Path(self.paths.data / 'commonFreeHours.ini').unlink(missing_ok=True)
                 self.login_setup()
                 self.login_view()
             # Set the main window's content

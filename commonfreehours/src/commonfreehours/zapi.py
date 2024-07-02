@@ -130,20 +130,22 @@ class zermelo:
         return (now.year, now.isocalendar()[1], int((datetime.datetime.fromtimestamp(
             now.timestamp()) - datetime.datetime.utcfromtimestamp(now.timestamp())).total_seconds() / 3600))
 
-    def get_raw_schedule(self, year: int = None, week: int = None, username: str = None, teacher: bool = False) -> dict:
+    def get_raw_schedule(self, year: int = None, week: int = None, username: str = None, teacher: bool = False, weeks=2) -> dict:
         time = self.get_date()
         if year == None:
             year = time[0]
         if week == None:
             week = time[1]
+
+        # indexing starts at 0 apparently
+        week -= 1
+
         if username == None:
             url = f"https://{self.school}.zportal.nl/api/v3/liveschedule?access_token={self.token}&{'teacher' if (self.teacher) else 'student'}={self.username}&week={year}{week:0>2}"
         else:
             start = str(datetime.datetime.strptime(f"{year}-{week}-0", "%Y-%U-%w").timestamp())[0:-2]
-            end = str(datetime.datetime.strptime(f"{year}-{week}-6", "%Y-%U-%w").timestamp())[0:-2]
+            end = str(datetime.datetime.strptime(f"{year}-{week + weeks - 1}-6", "%Y-%U-%w").timestamp())[0:-2]
             url = f"https://{self.school}.zportal.nl/api/v3/appointments?access_token={self.token}&start={start}&end={end}&{'teachers' if (teacher) else 'possibleStudents'}={username}"
-        if self.debug:
-            print(url)
         rawr = requests.get(url)
         if self.debug:
             print(rawr)
