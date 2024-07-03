@@ -50,7 +50,6 @@ class CommonFreeHours(toga.App):
         self.login_setup()
 
         if self.user_config.get('school') is None or self.user_config.get('account_name') is None:
-            self.login_setup()
             self.login_view()
         else:
             try:
@@ -84,7 +83,6 @@ class CommonFreeHours(toga.App):
             ):
                 pathlib.Path(self.paths.data / 'ZToken').unlink(missing_ok=True)
                 #pathlib.Path(self.paths.data / 'commonFreeHours.ini').unlink(missing_ok=True)
-                self.login_setup()
                 self.login_view()
             # Set the main window's content
 
