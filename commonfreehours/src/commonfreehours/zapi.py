@@ -186,6 +186,10 @@ class zermelo:
             # print(les["status"])
             if username != None:
                 code = 2002
+
+                if not les["groups"]:
+                    continue
+
                 if les["cancelled"] or not les["valid"]:
                     code = 4007
                 elif les["moved"]:

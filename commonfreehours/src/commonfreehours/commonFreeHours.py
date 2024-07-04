@@ -8,7 +8,9 @@ def parse_schedule(schedule):
     for week in schedule:
         for day in week:
             for event in day:
-                events.append(event)
+                # lesson cancellation
+                if event[4][0].get('code') != 4007:
+                    events.append(event)
     return events
 
 

@@ -314,7 +314,6 @@ class CommonFreeHours(toga.App):
         try:
             schedule = self.zermelo.sort_schedule(username=account1.id, teacher=account1.teacher)
             other_schedule = self.zermelo.sort_schedule(username=account2.id, teacher=account2.teacher)
-            print(schedule)
 
         except ValueError:
             # If zermelo auth expired
@@ -355,6 +354,10 @@ class CommonFreeHours(toga.App):
                 self.result_box.add(toga.Label(
                     f"[BREAK] {hour.get('start').strftime('%H:%M')} - {hour.get('end').strftime('%H:%M')} ({hour.get('end') - hour.get('start')})",
                     style=Pack(padding=(0, 5), font_size=FontSize.small.value)))
+
+        if not hours:
+            self.result_box.add(toga.Label('\nNo common free hours found.',
+                                           style=Pack(padding=(0, 5), font_size=FontSize.large.value)))
 
 
 def main():
