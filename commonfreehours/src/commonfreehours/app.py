@@ -314,11 +314,11 @@ class CommonFreeHours(toga.App):
         try:
             schedule = self.zermelo.sort_schedule(username=account1.id, teacher=account1.teacher)
             other_schedule = self.zermelo.sort_schedule(username=account2.id, teacher=account2.teacher)
+            print(schedule)
 
         except ValueError:
             # If zermelo auth expired
             pathlib.Path(self.paths.data / 'ZToken').unlink(missing_ok=True)
-            pathlib.Path(self.paths.data / 'commonFreeHours.ini').unlink(missing_ok=True)
             await self.main_window.info_dialog('Session expired', 'Please log in again.')
             self.login_view()
             return
