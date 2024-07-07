@@ -1,9 +1,12 @@
 """
 Easily check for common free hours in zermelo.
 """
+import asyncio
 import binascii
 import datetime
 import pathlib
+import threading
+import time
 from enum import Enum
 
 import requests
@@ -93,7 +96,7 @@ class CommonFreeHours(toga.App):
                     binascii.Error,  #
                     ValueError,  # For incorrect config file no token
                     urllib3.exceptions.LocationParseError,  # Catch zermelo 404
-                    requests.exceptions.ConnectionError # Invalid url
+                    requests.exceptions.ConnectionError  # Invalid url
             ):
                 self.logout_zermelo()
             # Set the main window's content
@@ -180,7 +183,7 @@ class CommonFreeHours(toga.App):
         compare_box.add(breaks_box)
 
         # Compute button
-        self.compute_button = toga.Button('Compute', on_press=self.compute, style=Pack(padding=(0, 5)))
+        self.compute_button = toga.Button('Compute', on_press=self.compute_scheduler, style=Pack(padding=(0, 5)))
 
         # Result
         self.result_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 5)))
@@ -239,7 +242,7 @@ class CommonFreeHours(toga.App):
         is_teacherz_box.add(self.zermelo_teacher)
         zermelo_box.add(is_teacherz_box)
 
-        self.login_button = toga.Button('Login', on_press=self.login, style=Pack(padding=(0, 5)))
+        self.login_button = toga.Button('Login', on_press=self.login_scheduler, style=Pack(padding=(0, 5)))
 
         # Add Zermelo section to main box
         self.login_box.add(zermelo_box)
@@ -257,16 +260,12 @@ class CommonFreeHours(toga.App):
 
         self.main_window.content = self.login_box
 
-    async def login(self, widget):
-        if self.zermelo_school.value == '' or self.zermelo_user.value == '' or self.zermelo_password.value == '':
-            await self.main_window.error_dialog('Authentication failed', 'Please fill in all fields and try again.')
-            return
+    def login_scheduler(self, widget):
+        asyncio.create_task(self.login())
 
-        print(
-            f"Logging in as {self.zermelo_user.value} on {self.zermelo_school.value} with teacher={self.zermelo_teacher.value}")
-
-        try:
-            zermelo = zapi.zermelo(
+    async def login(self):
+        def login_test():
+            zapi.zermelo(
                 school=self.zermelo_school.value.strip(),
                 username=self.zermelo_user.value.strip(),
                 teacher=self.zermelo_teacher.value,
@@ -275,38 +274,61 @@ class CommonFreeHours(toga.App):
                 token_file=self.paths.data / 'ZToken',
             )
 
-            self.user_config['school'] = self.zermelo_school.value.strip()
-            self.user_config['account_name'] = self.zermelo_user.value.strip()
-            self.user_config['teacher'] = str(self.zermelo_teacher.value)
+        await asyncio.sleep(0)  # Yield to event loop briefly
+        loop = asyncio.get_event_loop()
 
-            print("Logged in successfully")
+        if self.zermelo_school.value == '' or self.zermelo_user.value == '' or self.zermelo_password.value == '':
+            await self.main_window.error_dialog('Authentication failed', 'Please fill in all fields and try again.')
+            return
 
-            with open(self.paths.data / 'commonFreeHours.ini', 'w') as f:
-                self.config.write(f)
+        self.login_button.enabled = False
+        self.login_button.text = "Logging in..."
 
-            print("Saved config")
+        print(
+            f"Logging in as {self.zermelo_user.value} on {self.zermelo_school.value} with teacher={self.zermelo_teacher.value}")
 
-            self.zermelo = zapi.zermelo(
-                self.user_config.get('school'),
-                self.user_config.get('account_name'),
-                teacher=self.user_config.get('is_teacher'),
-                version=3,
-                token_file=self.paths.data / 'ZToken'
-            )
+        try:
+            await loop.run_in_executor(None, login_test)
+        except (RuntimeError, ValueError) as e:
+            print(e)
+            self.login_button.enabled = True
+            self.login_button.text = "Login"
+            await self.main_window.error_dialog('Authentication failed', 'Please try again')
+            return
 
-            print(
-                f"Created new zermelo instance as {self.zermelo_user.value} on {self.zermelo_school.value} with teacher={self.zermelo_teacher.value}")
+        self.user_config['school'] = self.zermelo_school.value.strip()
+        self.user_config['account_name'] = self.zermelo_user.value.strip()
+        self.user_config['teacher'] = str(self.zermelo_teacher.value)
 
-            if not self.main_loaded:
-                self.schoolInSchoolYear = self.zermelo.getSchoolInSchoolYear(self.zermelo.getSchoolInSchoolYears())
-                self.accounts = self.zermelo.getAccounts(self.schoolInSchoolYear)
+        print("Logged in successfully")
 
-                self.main_setup()
-                self.main_loaded = True
+        with open(self.paths.data / 'commonFreeHours.ini', 'w') as f:
+            self.config.write(f)
 
-            self.main()
-        except ValueError:
-            await self.main_window.error_dialog('Authentication failed', 'Please try again.')
+        print("Saved config")
+
+        self.zermelo = zapi.zermelo(
+            self.user_config.get('school'),
+            self.user_config.get('account_name'),
+            teacher=self.user_config.get('is_teacher'),
+            version=3,
+            token_file=self.paths.data / 'ZToken'
+        )
+
+        print(
+            f"Created new zermelo instance as {self.zermelo_user.value} on {self.zermelo_school.value} with teacher={self.zermelo_teacher.value}")
+
+        if not self.main_loaded:
+            self.schoolInSchoolYear = self.zermelo.getSchoolInSchoolYear(self.zermelo.getSchoolInSchoolYears())
+            self.accounts = self.zermelo.getAccounts(self.schoolInSchoolYear)
+
+            self.main_setup()
+            self.main_loaded = True
+
+        self.login_button.enabled = True
+        self.login_button.text = "Login"
+
+        self.main()
 
     async def logout_trigger(self, widget):
         if await self.main_window.confirm_dialog('Confirm logging out', 'Are you sure you want to log out?'):
@@ -321,7 +343,21 @@ class CommonFreeHours(toga.App):
 
         print("Logged out")
 
-    async def compute(self, widget):
+    def compute_scheduler(self, widget):
+        asyncio.create_task(self.compute())
+
+    async def compute(self):
+        def set_schedules():
+            global schedule
+            global other_schedule
+            schedule = self.zermelo.sort_schedule(username=account1.id, teacher=account1.teacher)
+            other_schedule = self.zermelo.sort_schedule(username=account2.id, teacher=account2.teacher)
+
+        await asyncio.sleep(0)  # Yield to event loop briefly
+        loop = asyncio.get_event_loop()
+
+        self.compute_button.enabled = False
+        self.compute_button.text = "Fetching data..."
 
         def is_day_later(date1, date2):
             # Extract dates without time
@@ -341,24 +377,32 @@ class CommonFreeHours(toga.App):
         show_breaks = self.show_breaks.value
 
         try:
-            schedule = self.zermelo.sort_schedule(username=account1.id, teacher=account1.teacher)
-            other_schedule = self.zermelo.sort_schedule(username=account2.id, teacher=account2.teacher)
+            await loop.run_in_executor(None, set_schedules)
 
         except ValueError:
             # If zermelo auth expired
-            pathlib.Path(self.paths.data / 'ZToken').unlink(missing_ok=True)
+            self.logout_zermelo()
             await self.main_window.info_dialog('Session expired', 'Please log in again.')
-            self.login_view()
+            self.compute_button.text = "Compute"
+            self.compute_button.enabled = True
             return
 
         if not schedule:
             await self.main_window.error_dialog('No schedule found', 'No schedule found for user 1.')
+            self.compute_button.text = "Compute"
+            self.compute_button.enabled = True
             return
         if not other_schedule:
             await self.main_window.error_dialog('No schedule found', 'No schedule found for user 2.')
+            self.compute_button.text = "Compute"
+            self.compute_button.enabled = True
             return
 
+        self.compute_button.text = "Processing data..."
+
         hours = free_common_hours(schedule, other_schedule, show_breaks)
+
+        self.compute_button.text = "Listing data..."
 
         self.result_box.clear()
 
@@ -388,6 +432,9 @@ class CommonFreeHours(toga.App):
         if not hours:
             self.result_box.add(toga.Label('\nNo common free hours found.',
                                            style=Pack(padding=(0, 5), font_size=FontSize.large.value)))
+
+        self.compute_button.text = "Compute"
+        self.compute_button.enabled = True
 
 
 def main():
