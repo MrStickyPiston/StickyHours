@@ -6,6 +6,7 @@ import datetime
 import pathlib
 from enum import Enum
 
+import requests
 import toga
 import configparser
 
@@ -32,6 +33,20 @@ class CommonFreeHours(toga.App):
     def startup(self):
         # Main window of the application
         self.main_window = toga.MainWindow(title=self.formal_name)
+
+        # Setup command for logout
+        self.account_group = toga.command.Group(
+            text='Account',
+        )
+
+        self.logout_command = toga.Command(
+            self.logout_trigger,
+            text='Log out',
+            enabled=False,
+            group=self.account_group
+        )
+
+        self.commands.add(self.logout_command)
 
         self.config = configparser.ConfigParser()
         self.config.read(self.paths.data / 'commonFreeHours.ini')
@@ -73,17 +88,14 @@ class CommonFreeHours(toga.App):
                     self.main()
                 except ValueError:
                     # If zermelo auth expired
-                    pathlib.Path(self.paths.data / 'ZToken').unlink(missing_ok=True)
-                    #pathlib.Path(self.paths.data / 'commonFreeHours.ini').unlink(missing_ok=True)
-                    self.login_view()
+                    self.logout_zermelo()
             except (
                     binascii.Error,  #
                     ValueError,  # For incorrect config file no token
-                    urllib3.exceptions.LocationParseError  # Catch zermelo 404
+                    urllib3.exceptions.LocationParseError,  # Catch zermelo 404
+                    requests.exceptions.ConnectionError # Invalid url
             ):
-                pathlib.Path(self.paths.data / 'ZToken').unlink(missing_ok=True)
-                #pathlib.Path(self.paths.data / 'commonFreeHours.ini').unlink(missing_ok=True)
-                self.login_view()
+                self.logout_zermelo()
             # Set the main window's content
 
         self.main_window.show()
@@ -184,6 +196,8 @@ class CommonFreeHours(toga.App):
     def main(self):
         self.main_window.title = "CommonFreeHours"
 
+        self.logout_command.enabled = True
+
         self.main_window.content = self.main_container
 
     def login_setup(self):
@@ -235,6 +249,8 @@ class CommonFreeHours(toga.App):
     def login_view(self):
         self.main_window.title = "Login - CommonFreeHours"
 
+        self.logout_command.enabled = False
+
         self.zermelo_school.value = self.user_config.get('school')
         self.zermelo_user.value = self.user_config.get('account_name')
         self.zermelo_teacher.value = self.user_config.get('teacher')
@@ -251,16 +267,16 @@ class CommonFreeHours(toga.App):
 
         try:
             zermelo = zapi.zermelo(
-                school=self.zermelo_school.value,
-                username=self.zermelo_user.value,
+                school=self.zermelo_school.value.strip(),
+                username=self.zermelo_user.value.strip(),
                 teacher=self.zermelo_teacher.value,
                 password=self.zermelo_password.value,
                 version=3,
                 token_file=self.paths.data / 'ZToken',
             )
 
-            self.user_config['school'] = self.zermelo_school.value
-            self.user_config['account_name'] = self.zermelo_user.value
+            self.user_config['school'] = self.zermelo_school.value.strip()
+            self.user_config['account_name'] = self.zermelo_user.value.strip()
             self.user_config['teacher'] = str(self.zermelo_teacher.value)
 
             print("Logged in successfully")
@@ -291,6 +307,19 @@ class CommonFreeHours(toga.App):
             self.main()
         except ValueError:
             await self.main_window.error_dialog('Authentication failed', 'Please try again.')
+
+    async def logout_trigger(self, widget):
+        if await self.main_window.confirm_dialog('Confirm logging out', 'Are you sure you want to log out?'):
+            self.logout_zermelo()
+            await self.main_window.info_dialog('Logged out', 'Successfully logged out')
+        else:
+            print("Cancelled logging out")
+
+    def logout_zermelo(self):
+        pathlib.Path(self.paths.data / 'ZToken').unlink(missing_ok=True)
+        self.login_view()
+
+        print("Logged out")
 
     async def compute(self, widget):
 
@@ -335,8 +364,9 @@ class CommonFreeHours(toga.App):
 
         self.result_box.add(toga.Label(f"Common free hours:", style=Pack(padding=(0, 5), font_size=FontSize.big.value)))
         self.result_box.add(
-            toga.Label(f"Account 1: {account1.name}\nAccount 2: {account2.name}\nBreaks shown: {'yes' if show_breaks else 'no'}",
-                       style=Pack(padding=(0, 5), font_size=FontSize.small.value)))
+            toga.Label(
+                f"Account 1: {account1.name}\nAccount 2: {account2.name}\nBreaks shown: {'yes' if show_breaks else 'no'}",
+                style=Pack(padding=(0, 5), font_size=FontSize.small.value)))
 
         day = datetime.datetime.fromtimestamp(datetime.MINYEAR)
 
