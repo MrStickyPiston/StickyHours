@@ -11,8 +11,8 @@ author_email = "mr.sticky.piston@gmail.com"
 [tool.briefcase.app.commonfreehours]
 formal_name = "CommonFreeHours"
 description = "Easily check for common free hours in zermelo."
-long_description = """More details about the app should go here.
-"""
+long_description = """Edit this description in pyproject.toml"""
+icon = "icons/icon"
 sources = [
     "src/commonfreehours",
 ]

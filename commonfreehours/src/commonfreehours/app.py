@@ -5,8 +5,6 @@ import asyncio
 import binascii
 import datetime
 import pathlib
-import threading
-import time
 from enum import Enum
 
 import requests
