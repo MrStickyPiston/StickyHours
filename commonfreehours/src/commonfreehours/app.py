@@ -195,7 +195,7 @@ class CommonFreeHours(toga.App):
         main_box.add(self.result_box)
 
     def main(self):
-        self.main_window.title = "CommonFreeHours"
+        self.main_window.title = self.formal_name
 
         self.logout_command.enabled = True
 
@@ -248,7 +248,7 @@ class CommonFreeHours(toga.App):
         self.login_box.add(self.login_button)
 
     def login_view(self):
-        self.main_window.title = "Login - CommonFreeHours"
+        self.main_window.title = f"Zermelo login - {self.formal_name}"
 
         self.logout_command.enabled = False
 
