@@ -266,7 +266,7 @@ class CommonFreeHours(toga.App):
 
         self.zermelo_school.value = self.user_config.get('school')
         self.zermelo_user.value = self.user_config.get('account_name')
-        self.zermelo_teacher.value = self.user_config.get('teacher')
+        self.zermelo_teacher.value = self.user_config.get('teacher') == 'True'
 
         self.main_window.content = self.login_box
 

@@ -60,7 +60,7 @@ class Lang:
                 "main.results.header": "Common free hours",
                 "common.no": "no",
                 "common.yes": "yes",
-                "main.results.break_.indicator.text": "BREAK",
+                "main.results.break.indicator.text": "BREAK",
                 "main.results.none": "No common free hours found."
             },
 
@@ -96,7 +96,7 @@ class Lang:
                 "main.results.header": "Gezamelijke tussenuren",
                 "common.no": "Nee",
                 "common.yes": "Ja",
-                "main.results.break_.indicator.text": "PAUZE",
+                "main.results.break.indicator.text": "PAUZE",
                 "main.results.none": "Geen gezamelijke tussenuren gevonden."
             }
         }
