@@ -81,7 +81,7 @@ class zermelo:
             print(token)
         url = f'https://{self.school}.zportal.nl/api/{self.version}/oauth/token'
         myobj = {'code': token, 'client_id': 'ZermeloPortal', 'client_secret': 42,
-                 'grant_type': 'authorization_code', 'rememberMe': False}
+                 'grant_type': 'authorization_code', 'rememberMe': True}
         if self.debug:
             print("\n\n")
         if self.debug:
@@ -150,6 +150,8 @@ class zermelo:
         if self.debug:
             print(rawr)
         rl = json.loads(rawr.text)
+
+        print(url)
 
         if rl.get('response', {}).get('status') == 401:
             raise ValueError('Zermelo authentication error')
