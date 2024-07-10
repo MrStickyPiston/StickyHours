@@ -361,8 +361,18 @@ class CommonFreeHours(toga.App):
         def set_schedules():
             global schedule
             global other_schedule
+
             schedule = self.zermelo.sort_schedule(username=account1.id, teacher=account1.teacher)
             other_schedule = self.zermelo.sort_schedule(username=account2.id, teacher=account2.teacher)
+
+        async def error(user):
+            await self.main_window.error_dialog(
+                _('main.error.no-schedule.title'),
+                _('main.error.no-schedule.message').format(user)
+            )
+
+            self.compute_button.text = _('main.button.idle')
+            self.compute_button.enabled = True
 
         await asyncio.sleep(0)  # Yield to event loop briefly
         loop = asyncio.get_event_loop()
@@ -387,26 +397,29 @@ class CommonFreeHours(toga.App):
 
         show_breaks = self.show_breaks.value
 
+        if account1 is None:
+            await error(self.name1_input.value.strip() if self.name1_input.value.strip() != '' else _('main.accounts.1.title'))
+            return
+        if account2 is None:
+            await error(self.name2_input.value.strip() if self.name1_input.value.strip() != '' else _('main.accounts.2.title'))
+            return
+
         try:
             await loop.run_in_executor(None, set_schedules)
 
         except ValueError:
             # If zermelo auth expired
             self.logout_zermelo()
-            await self.main_window.info_dialog('Session expired', 'Please log in again.')
+            await self.main_window.info_dialog(_('auth.error.expired.title'), _('auth.error.expired.message'))
             self.compute_button.text = _('main.button.idle')
             self.compute_button.enabled = True
             return
 
         if not schedule:
-            await self.main_window.error_dialog('No schedule found', 'No schedule found for user 1.')
-            self.compute_button.text = _('main.button.idle')
-            self.compute_button.enabled = True
+            await error(account1.name)
             return
         if not other_schedule:
-            await self.main_window.error_dialog('No schedule found', 'No schedule found for user 2.')
-            self.compute_button.text = _('main.button.idle')
-            self.compute_button.enabled = True
+            await error(account2.name)
             return
 
         self.compute_button.text = _('main.button.processing')

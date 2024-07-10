@@ -10,6 +10,8 @@
       <excludeFolder url="file://$MODULE_DIR$/commonfreehours/dist" />
       <excludeFolder url="file://$MODULE_DIR$/commonfreehours/logs" />
       <excludeFolder url="file://$MODULE_DIR$/commonfreehours/src/commonfreehours.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/android/gradle/app/src/main/python" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/android/gradle/app/src/main/python-briefcase" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.12 (CommonFreeHours-app)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

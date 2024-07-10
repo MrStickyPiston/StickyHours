@@ -61,7 +61,11 @@ class Lang:
                 "common.no": "no",
                 "common.yes": "yes",
                 "main.results.break.indicator.text": "BREAK",
-                "main.results.none": "No common free hours found."
+                "main.results.none": "No common free hours found.",
+                "main.error.no-schedule.title": "No schedule found",
+                "main.error.no-schedule.message": "No schedule with gaps found for {}.",
+                "auth.error.expired.title": "Session expired",
+                "auth.error.expired.message": "Please log in again to renew the session."
             },
 
             "nl_NL": {
@@ -97,7 +101,11 @@ class Lang:
                 "common.no": "Nee",
                 "common.yes": "Ja",
                 "main.results.break.indicator.text": "PAUZE",
-                "main.results.none": "Geen gezamelijke tussenuren gevonden."
+                "main.results.none": "Geen gezamelijke tussenuren gevonden.",
+                "main.error.no-schedule.title": "Geen rooster gevonden",
+                "main.error.no-schedule.message": "Geen rooster gevonden voor {}.",
+                "auth.error.expired.title": "Sessie verlopen",
+                "auth.error.expired.message": "Log opnieuw in om de sessie te vernieuwen."
             }
         }
 
