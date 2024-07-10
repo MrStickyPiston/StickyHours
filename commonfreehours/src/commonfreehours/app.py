@@ -224,9 +224,6 @@ class CommonFreeHours(toga.App):
         school_info_box = toga.Box(style=Pack(direction=COLUMN))
         school_info_box.add(
             toga.Label(_('auth.school'), style=Pack(font_size=FontSize.large.value)))
-        school_info_box.add(
-            toga.Label(_('auth.school.explaination'))
-        )
 
         school_box = toga.Box(style=Pack(direction=COLUMN))
         school_box.add(school_info_box)
@@ -240,9 +237,6 @@ class CommonFreeHours(toga.App):
         user_info_box = toga.Box(style=Pack(direction=COLUMN))
         user_info_box.add(
             toga.Label(_('auth.user'), style=Pack(font_size=FontSize.large.value)))
-        user_info_box.add(
-            toga.Label(_('auth.user.explaination'))
-        )
 
         user_box = toga.Box(style=Pack(direction=COLUMN))
         user_box.add(user_info_box)
@@ -255,9 +249,6 @@ class CommonFreeHours(toga.App):
         password_info_box = toga.Box(style=Pack(direction=COLUMN))
         password_info_box.add(
             toga.Label(_('auth.school'), style=Pack(font_size=FontSize.large.value)))
-        password_info_box.add(
-            toga.Label(_('auth.school.explaination'))
-        )
 
         password_box = toga.Box(style=Pack(direction=COLUMN))
         password_box.add(password_info_box)
