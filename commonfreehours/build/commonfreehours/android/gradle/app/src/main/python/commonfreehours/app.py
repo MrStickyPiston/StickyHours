@@ -122,9 +122,7 @@ class CommonFreeHours(toga.App):
         self.main_container = toga.ScrollContainer(content=main_box, horizontal=False)
 
         # Compare section
-        compare_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 5)))
-        compare_box.add(
-            toga.Label(_('main.settings.header'), style=Pack(padding=(0, 5, 10, 5), font_size=FontSize.big.value)))
+        compare_box = toga.Box(style=Pack(direction=COLUMN))
 
         # Account name 1
         account1_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 0, 10, 0)))
@@ -132,7 +130,7 @@ class CommonFreeHours(toga.App):
         name1_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 5)))
 
         name1_box.add(
-            toga.Label(_('main.accounts.1.title'), style=Pack(padding=(0, 5), font_size=FontSize.large.value)))
+            toga.Label(_('main.accounts.1.title'), style=Pack(font_size=FontSize.large.value)))
 
         self.name1_input = toga.TextInput(
             style=Pack(flex=1, padding=(0, 5)),
@@ -157,7 +155,7 @@ class CommonFreeHours(toga.App):
         name2_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 5)))
 
         name2_box.add(
-            toga.Label(_('main.accounts.2.title'), style=Pack(padding=(0, 5), font_size=FontSize.large.value)))
+            toga.Label(_('main.accounts.2.title'), style=Pack(font_size=FontSize.large.value)))
 
         self.name2_input = toga.TextInput(
             style=Pack(flex=1, padding=(0, 5)),
@@ -191,13 +189,12 @@ class CommonFreeHours(toga.App):
         compare_box.add(breaks_box)
 
         # Compute button
-        self.compute_button = toga.Button(_('main.button.idle'), on_press=self.compute_scheduler,
-                                          style=Pack(padding=(0, 5)))
+        self.compute_button = toga.Button(_('main.button.idle'), on_press=self.compute_scheduler)
 
         # Result
         self.result_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 5)))
 
-        result_label = toga.Label(_('main.results.placeholder'), style=Pack(padding=(0, 5), flex=1))
+        result_label = toga.Label(_('main.results.placeholder'), style=Pack(flex=1))
         self.result_box.add(result_label)
 
         # Add Compare section to main box
@@ -216,7 +213,7 @@ class CommonFreeHours(toga.App):
         self.login_box = toga.Box(style=Pack(direction=COLUMN, padding=10))
 
         # Zermelo credentials section
-        zermelo_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 5)))
+        zermelo_box = toga.Box(style=Pack(direction=COLUMN))
 
         # Zermelo school
         self.zermelo_school_input = toga.TextInput()
@@ -257,14 +254,13 @@ class CommonFreeHours(toga.App):
         zermelo_box.add(password_box)
 
         self.zermelo_teacher = toga.Switch('', style=Pack(font_size=FontSize.large.value))
-        is_teacherz_box = toga.Box(style=Pack(direction=ROW, padding=(0, 5)))
+        is_teacherz_box = toga.Box(style=Pack(direction=ROW))
         is_teacherz_box.add(
-            toga.Label(_('auth.is_teacher'), style=Pack(padding=(0, 5), font_size=FontSize.small.value)))
+            toga.Label(_('auth.is_teacher'), style=Pack(font_size=FontSize.small.value)))
         is_teacherz_box.add(self.zermelo_teacher)
         zermelo_box.add(is_teacherz_box)
 
-        self.login_button = toga.Button(_('auth.button.idle'), on_press=self.login_scheduler,
-                                        style=Pack(padding=(0, 5)))
+        self.login_button = toga.Button(_('auth.button.idle'), on_press=self.login_scheduler)
 
         # Add Zermelo section to main box
         self.login_box.add(zermelo_box)
@@ -445,11 +441,11 @@ class CommonFreeHours(toga.App):
         self.result_box.clear()
 
         self.result_box.add(
-            toga.Label(_('main.results.header'), style=Pack(padding=(0, 5), font_size=FontSize.big.value)))
+            toga.Label(_('main.results.header'), style=Pack(font_size=FontSize.big.value)))
         self.result_box.add(
             toga.Label(
                 f"{_('main.accounts.1.title')}: {account1.name}\n{_('main.accounts.2.title')}: {account2.name}\n{_('main.breaks.show')}: {_('common.yes') if show_breaks else _('common.no')}",
-                style=Pack(padding=(0, 5), font_size=FontSize.small.value)))
+                style=Pack(font_size=FontSize.small.value)))
 
         day = datetime.datetime.fromtimestamp(datetime.MINYEAR)
 
@@ -457,20 +453,20 @@ class CommonFreeHours(toga.App):
             if is_day_later(day, hour.get('start')):
                 day = hour.get('start')
                 self.result_box.add(toga.Label(hour.get('start').strftime('\n%A %d %B %Y'),
-                                               style=Pack(padding=(0, 5), font_size=FontSize.large.value)))
+                                               style=Pack(font_size=FontSize.large.value)))
 
             if not hour.get('break'):
                 self.result_box.add(toga.Label(
                     f"{hour.get('start').strftime('%H:%M')} - {hour.get('end').strftime('%H:%M')} ({hour.get('end') - hour.get('start')})",
-                    style=Pack(padding=(0, 5), font_size=FontSize.small.value)))
+                    style=Pack(font_size=FontSize.small.value)))
             elif show_breaks:
                 self.result_box.add(toga.Label(
                     f"[{_('main.results.break.indicator.text')}] {hour.get('start').strftime('%H:%M')} - {hour.get('end').strftime('%H:%M')} ({hour.get('end') - hour.get('start')})",
-                    style=Pack(padding=(0, 5), font_size=FontSize.small.value)))
+                    style=Pack(font_size=FontSize.small.value)))
 
         if not hours:
             self.result_box.add(toga.Label(f'\n{_('main.results.none')}',
-                                           style=Pack(padding=(0, 5), font_size=FontSize.large.value)))
+                                           style=Pack(font_size=FontSize.large.value)))
 
         self.compute_button.text = _('main.button.idle')
         self.compute_button.enabled = True

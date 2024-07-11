@@ -189,13 +189,12 @@ class CommonFreeHours(toga.App):
         compare_box.add(breaks_box)
 
         # Compute button
-        self.compute_button = toga.Button(_('main.button.idle'), on_press=self.compute_scheduler,
-                                          style=Pack(padding=(0, 5)))
+        self.compute_button = toga.Button(_('main.button.idle'), on_press=self.compute_scheduler)
 
         # Result
         self.result_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 5)))
 
-        result_label = toga.Label(_('main.results.placeholder'), style=Pack(padding=(0, 5), flex=1))
+        result_label = toga.Label(_('main.results.placeholder'), style=Pack(flex=1))
         self.result_box.add(result_label)
 
         # Add Compare section to main box
@@ -442,11 +441,11 @@ class CommonFreeHours(toga.App):
         self.result_box.clear()
 
         self.result_box.add(
-            toga.Label(_('main.results.header'), style=Pack(padding=(0, 5), font_size=FontSize.big.value)))
+            toga.Label(_('main.results.header'), style=Pack(font_size=FontSize.big.value)))
         self.result_box.add(
             toga.Label(
                 f"{_('main.accounts.1.title')}: {account1.name}\n{_('main.accounts.2.title')}: {account2.name}\n{_('main.breaks.show')}: {_('common.yes') if show_breaks else _('common.no')}",
-                style=Pack(padding=(0, 5), font_size=FontSize.small.value)))
+                style=Pack(font_size=FontSize.small.value)))
 
         day = datetime.datetime.fromtimestamp(datetime.MINYEAR)
 
@@ -454,20 +453,20 @@ class CommonFreeHours(toga.App):
             if is_day_later(day, hour.get('start')):
                 day = hour.get('start')
                 self.result_box.add(toga.Label(hour.get('start').strftime('\n%A %d %B %Y'),
-                                               style=Pack(padding=(0, 5), font_size=FontSize.large.value)))
+                                               style=Pack(font_size=FontSize.large.value)))
 
             if not hour.get('break'):
                 self.result_box.add(toga.Label(
                     f"{hour.get('start').strftime('%H:%M')} - {hour.get('end').strftime('%H:%M')} ({hour.get('end') - hour.get('start')})",
-                    style=Pack(padding=(0, 5), font_size=FontSize.small.value)))
+                    style=Pack(font_size=FontSize.small.value)))
             elif show_breaks:
                 self.result_box.add(toga.Label(
                     f"[{_('main.results.break.indicator.text')}] {hour.get('start').strftime('%H:%M')} - {hour.get('end').strftime('%H:%M')} ({hour.get('end') - hour.get('start')})",
-                    style=Pack(padding=(0, 5), font_size=FontSize.small.value)))
+                    style=Pack(font_size=FontSize.small.value)))
 
         if not hours:
             self.result_box.add(toga.Label(f'\n{_('main.results.none')}',
-                                           style=Pack(padding=(0, 5), font_size=FontSize.large.value)))
+                                           style=Pack(font_size=FontSize.large.value)))
 
         self.compute_button.text = _('main.button.idle')
         self.compute_button.enabled = True
