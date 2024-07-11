@@ -64,8 +64,7 @@ class Lang:
                 "main.error.no-schedule.title": "No schedule found",
                 "main.error.no-schedule.message": "No schedule with gaps found for {}.",
                 "auth.error.expired.title": "Session expired",
-                "auth.error.expired.message": "Please log in again to renew the session.",
-                "auth.school.explaination": "The zermelo school / organization is the id of your zermelo instance.\nIf you know how to access your school's zermelo via a website,\ntake everything between 'https://' and the first '.', and enter it here.\nIf you don't know how to access your schools zermelo instance, ask your school."
+                "auth.error.expired.message": "Please log in again to renew the session."
             },
 
             "nl_NL": {

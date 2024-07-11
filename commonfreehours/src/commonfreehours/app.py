@@ -248,7 +248,7 @@ class CommonFreeHours(toga.App):
         self.zermelo_password = toga.PasswordInput()
         password_info_box = toga.Box(style=Pack(direction=COLUMN))
         password_info_box.add(
-            toga.Label(_('auth.school'), style=Pack(font_size=FontSize.large.value)))
+            toga.Label(_('auth.password'), style=Pack(font_size=FontSize.large.value)))
 
         password_box = toga.Box(style=Pack(direction=COLUMN))
         password_box.add(password_info_box)
