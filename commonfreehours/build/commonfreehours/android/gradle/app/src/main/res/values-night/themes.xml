@@ -59,4 +59,10 @@
     <style name="AppTheme.Launcher">
         <item name="android:windowBackground">@drawable/splash_screen_background</item>
     </style>
+
+    <style name="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <!-- Customize button text color -->
+        <item name="android:textColor">#ffffff</item>
+        <!-- Add other dialog-specific customizations if needed -->
+    </style>
 </resources>

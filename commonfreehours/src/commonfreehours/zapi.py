@@ -151,8 +151,6 @@ class zermelo:
             print(rawr)
         rl = json.loads(rawr.text)
 
-        print(url)
-
         if rl.get('response', {}).get('status') == 401:
             raise ValueError('Zermelo authentication error')
 

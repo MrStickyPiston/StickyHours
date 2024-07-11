@@ -122,9 +122,7 @@ class CommonFreeHours(toga.App):
         self.main_container = toga.ScrollContainer(content=main_box, horizontal=False)
 
         # Compare section
-        compare_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 5)))
-        compare_box.add(
-            toga.Label(_('main.settings.header'), style=Pack(padding=(0, 5, 10, 5), font_size=FontSize.big.value)))
+        compare_box = toga.Box(style=Pack(direction=COLUMN))
 
         # Account name 1
         account1_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 0, 10, 0)))
@@ -132,7 +130,7 @@ class CommonFreeHours(toga.App):
         name1_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 5)))
 
         name1_box.add(
-            toga.Label(_('main.accounts.1.title'), style=Pack(padding=(0, 5), font_size=FontSize.large.value)))
+            toga.Label(_('main.accounts.1.title'), style=Pack(font_size=FontSize.large.value)))
 
         self.name1_input = toga.TextInput(
             style=Pack(flex=1, padding=(0, 5)),
@@ -157,7 +155,7 @@ class CommonFreeHours(toga.App):
         name2_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 5)))
 
         name2_box.add(
-            toga.Label(_('main.accounts.2.title'), style=Pack(padding=(0, 5), font_size=FontSize.large.value)))
+            toga.Label(_('main.accounts.2.title'), style=Pack(font_size=FontSize.large.value)))
 
         self.name2_input = toga.TextInput(
             style=Pack(flex=1, padding=(0, 5)),
@@ -216,7 +214,7 @@ class CommonFreeHours(toga.App):
         self.login_box = toga.Box(style=Pack(direction=COLUMN, padding=10))
 
         # Zermelo credentials section
-        zermelo_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 5)))
+        zermelo_box = toga.Box(style=Pack(direction=COLUMN))
 
         # Zermelo school
         self.zermelo_school_input = toga.TextInput()
@@ -257,14 +255,13 @@ class CommonFreeHours(toga.App):
         zermelo_box.add(password_box)
 
         self.zermelo_teacher = toga.Switch('', style=Pack(font_size=FontSize.large.value))
-        is_teacherz_box = toga.Box(style=Pack(direction=ROW, padding=(0, 5)))
+        is_teacherz_box = toga.Box(style=Pack(direction=ROW))
         is_teacherz_box.add(
-            toga.Label(_('auth.is_teacher'), style=Pack(padding=(0, 5), font_size=FontSize.small.value)))
+            toga.Label(_('auth.is_teacher'), style=Pack(font_size=FontSize.small.value)))
         is_teacherz_box.add(self.zermelo_teacher)
         zermelo_box.add(is_teacherz_box)
 
-        self.login_button = toga.Button(_('auth.button.idle'), on_press=self.login_scheduler,
-                                        style=Pack(padding=(0, 5)))
+        self.login_button = toga.Button(_('auth.button.idle'), on_press=self.login_scheduler)
 
         # Add Zermelo section to main box
         self.login_box.add(zermelo_box)
