@@ -1,53 +1,32 @@
-import locale
 import string
 
-import toga.platform
-
-if toga.platform.get_current_platform() == 'android':
-    import java
-
-    def get_locale():
-        Resources = java.jclass('android.content.res.Resources')
-
-        resources = Resources.getSystem()
-        configuration = resources.getConfiguration()
-
-        locale_list = configuration.getLocales()
-        return locale_list.get(0).toString()
-
-        return java.jclass('java.util.Locale').getDefault()
-else:
-    locale.setlocale(locale.LC_ALL, '')
-
-    def get_locale():
-        return locale.getdefaultlocale()[0]
+from commonfreehours import utils
 
 
 class Lang:
     def __init__(self):
-        self.lang = get_locale()
+        self.lang = utils.get_locale()
 
         self.languages = {
             "en_US": {
                 "command.group.account": "Account",
                 "command.logout": "Log out",
-                "main.settings.header": "Settings",
                 "main.accounts.1.title": "Account 1",
                 "main.accounts.search": "Search accounts",
                 "main.accounts.2.title": "Account 2",
-                "main.breaks.header": "Breaks",
                 "main.breaks.show": "Also show breaks",
                 "main.results.placeholder": "Result will be shown here",
-                "auth.school": "School / organization",
-                "auth.user": "Account name",
-                "auth.password": "Account password",
+                "auth.school": "Zermelo portal id",
+                "auth.user": "Zermelo account name",
+                "auth.password": "Zermelo account password",
                 "auth.is_teacher": "Account is a teacher account",
                 "auth.button.idle": "Log in",
                 "auth.window.title": "Zermelo login",
                 "auth.message.failed.message.fields": "Please fill in all fields and try again.",
                 "auth.message.failed.title": "Authentication failed",
                 "auth.button.progress": "Logging in...",
-                "auth.message.failed.message": "Please check if the credentials are right and try again.",
+                "auth.message.failed.message": "Please check if the credentials are right and try again, or click the "
+                                               "help button for more information.",
                 "command.logout.confirm.message": "Are you sure you want to log out?",
                 "command.logout.confirm.title": "Confirm logging out",
                 "command.logout.success.message": "Successfully logged out.",
@@ -64,20 +43,19 @@ class Lang:
                 "main.error.no-schedule.title": "No schedule found",
                 "main.error.no-schedule.message": "No schedule with gaps found for {}.",
                 "auth.error.expired.title": "Session expired",
-                "auth.error.expired.message": "Please log in again to renew the session."
+                "auth.error.expired.message": "Please log in again to renew the session.",
+                "auth.button.help": "Help"
             },
 
             "nl_NL": {
                 "command.group.account": "Account",
                 "command.logout": "Afmelden",
-                "main.settings.header": "Instellingen",
                 "main.accounts.1.title": "Account 1",
                 "main.accounts.search": "Kies een account",
                 "main.accounts.2.title": "Account 2",
-                "main.breaks.header": "Pauzes",
                 "main.breaks.show": "Pauzes weergeven",
                 "main.results.placeholder": "De resultaten zullen hier komen te staan.",
-                "auth.school": "School / organisatie",
+                "auth.school": "Zermelo portal id",
                 "auth.user": "Zermelo gebruikersnaam",
                 "auth.password": "Zermelo wachtwoord",
                 "auth.is_teacher": "Dit account is een lerarenaccount",
@@ -86,7 +64,7 @@ class Lang:
                 "auth.message.failed.message.fields": "Vul alles in en probeer het opnieuw.",
                 "auth.message.failed.title": "Probleem bij inloggen",
                 "auth.button.progress": "Aan het inloggen...",
-                "auth.message.failed.message": "Controleer of de gegevens juist zijn en probeer het opnieuw.",
+                "auth.message.failed.message": "Controleer of de gegevens juist zijn en probeer het opnieuw, of klik op de hulpknop voor meer informatie.",
                 "command.logout.confirm.message": "Weet je zeker dat je wilt afmelden?",
                 "command.logout.confirm.title": "Afmelden bevestigen",
                 "command.logout.success.message": "Successvol afgemeld.",
@@ -99,11 +77,12 @@ class Lang:
                 "common.no": "Nee",
                 "common.yes": "Ja",
                 "main.results.break.indicator.text": "PAUZE",
-                "main.results.none": "Geen gezamelijke tussenuren gevonden.",
+                "main.results.none": "Geen gezamelijke tussenuren.",
                 "main.error.no-schedule.title": "Geen rooster gevonden",
                 "main.error.no-schedule.message": "Geen rooster gevonden voor {}.",
                 "auth.error.expired.title": "Sessie verlopen",
-                "auth.error.expired.message": "Log opnieuw in om de sessie te vernieuwen."
+                "auth.error.expired.message": "Log opnieuw in om de sessie te vernieuwen.",
+                "auth.button.help": "Hulp met inloggen"
             }
         }
 

@@ -5,6 +5,7 @@ import asyncio
 import binascii
 import datetime
 import pathlib
+import urllib
 from enum import Enum
 
 import requests
@@ -13,7 +14,7 @@ import configparser
 
 import urllib3.exceptions
 
-from commonfreehours import zapi
+from commonfreehours import zapi, utils
 from toga.style import Pack
 from toga.style.pack import COLUMN, ROW
 from commonfreehours.commonFreeHours import free_common_hours
@@ -261,11 +262,13 @@ class CommonFreeHours(toga.App):
         zermelo_box.add(is_teacherz_box)
 
         self.login_button = toga.Button(_('auth.button.idle'), on_press=self.login_scheduler)
+        self.login_help_button = toga.Button(_('auth.button.help'), on_press=self.login_help)
 
         # Add Zermelo section to main box
         self.login_box.add(zermelo_box)
 
         self.login_box.add(self.login_button)
+        self.login_box.add(self.login_help_button)
 
     def login_view(self):
         self.main_window.title = f"{_('auth.window.title')} - {self.formal_name}"
@@ -277,6 +280,10 @@ class CommonFreeHours(toga.App):
         self.zermelo_teacher.value = self.user_config.get('teacher') == 'True'
 
         self.main_window.content = self.login_box
+
+    async def login_help(self, widget):
+        utils.open_url(self.app.home_page.rstrip('/') + '/' + 'login-help')
+        pass
 
     def login_scheduler(self, widget):
         asyncio.create_task(self.login())

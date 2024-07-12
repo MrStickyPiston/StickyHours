@@ -1,41 +1,19 @@
-import locale
 import string
 
-import toga.platform
-
-if toga.platform.get_current_platform() == 'android':
-    import java
-
-    def get_locale():
-        Resources = java.jclass('android.content.res.Resources')
-
-        resources = Resources.getSystem()
-        configuration = resources.getConfiguration()
-
-        locale_list = configuration.getLocales()
-        return locale_list.get(0).toString()
-
-        return java.jclass('java.util.Locale').getDefault()
-else:
-    locale.setlocale(locale.LC_ALL, '')
-
-    def get_locale():
-        return locale.getdefaultlocale()[0]
+from commonfreehours import utils
 
 
 class Lang:
     def __init__(self):
-        self.lang = get_locale()
+        self.lang = utils.get_locale()
 
         self.languages = {
             "en_US": {
                 "command.group.account": "Account",
                 "command.logout": "Log out",
-                "main.settings.header": "Settings",
                 "main.accounts.1.title": "Account 1",
                 "main.accounts.search": "Search accounts",
                 "main.accounts.2.title": "Account 2",
-                "main.breaks.header": "Breaks",
                 "main.breaks.show": "Also show breaks",
                 "main.results.placeholder": "Result will be shown here",
                 "auth.school": "School / organization",
@@ -64,17 +42,16 @@ class Lang:
                 "main.error.no-schedule.title": "No schedule found",
                 "main.error.no-schedule.message": "No schedule with gaps found for {}.",
                 "auth.error.expired.title": "Session expired",
-                "auth.error.expired.message": "Please log in again to renew the session."
+                "auth.error.expired.message": "Please log in again to renew the session.",
+                "auth.button.help": "Help"
             },
 
             "nl_NL": {
                 "command.group.account": "Account",
                 "command.logout": "Afmelden",
-                "main.settings.header": "Instellingen",
                 "main.accounts.1.title": "Account 1",
                 "main.accounts.search": "Kies een account",
                 "main.accounts.2.title": "Account 2",
-                "main.breaks.header": "Pauzes",
                 "main.breaks.show": "Pauzes weergeven",
                 "main.results.placeholder": "De resultaten zullen hier komen te staan.",
                 "auth.school": "School / organisatie",
@@ -99,11 +76,12 @@ class Lang:
                 "common.no": "Nee",
                 "common.yes": "Ja",
                 "main.results.break.indicator.text": "PAUZE",
-                "main.results.none": "Geen gezamelijke tussenuren gevonden.",
+                "main.results.none": "Geen gezamelijke tussenuren.",
                 "main.error.no-schedule.title": "Geen rooster gevonden",
                 "main.error.no-schedule.message": "Geen rooster gevonden voor {}.",
                 "auth.error.expired.title": "Sessie verlopen",
-                "auth.error.expired.message": "Log opnieuw in om de sessie te vernieuwen."
+                "auth.error.expired.message": "Log opnieuw in om de sessie te vernieuwen.",
+                "auth.button.help": "Hulp met inloggen"
             }
         }
 
