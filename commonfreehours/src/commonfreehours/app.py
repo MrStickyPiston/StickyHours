@@ -191,7 +191,7 @@ class CommonFreeHours(toga.App):
         compare_box.add(breaks_box)
 
         # Compute button
-        self.compute_button = toga.Button(_('main.button.idle'), on_press=self.compute_scheduler)
+        self.compute_button = toga.Button(_('main.button.idle'), on_press=self.compute_scheduler, style=utils.button_style)
 
         # Result
         self.result_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 5)))
