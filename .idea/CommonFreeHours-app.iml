@@ -13,6 +13,45 @@
       <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/android/gradle/app/src/main/python" />
       <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/android/gradle/app/src/main/python-briefcase" />
       <excludeFolder url="file://$MODULE_DIR$/venv" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/StickyHours/app/commonfreehours-0.0.1.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/StickyHours/app_packages.iphoneos" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/StickyHours/app_packages.iphoneos/certifi-2024.7.4.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/StickyHours/app_packages.iphoneos/charset_normalizer-3.3.2.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/StickyHours/app_packages.iphoneos/fonttools-4.53.1.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/StickyHours/app_packages.iphoneos/idna-3.7.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/StickyHours/app_packages.iphoneos/requests-2.32.3.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/StickyHours/app_packages.iphoneos/rubicon_objc-0.4.9.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/StickyHours/app_packages.iphoneos/std_nslog-1.0.3.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/StickyHours/app_packages.iphoneos/toga_core-0.4.5.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/StickyHours/app_packages.iphoneos/toga_iOS-0.4.5.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/StickyHours/app_packages.iphoneos/travertino-0.3.0.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/StickyHours/app_packages.iphoneos/urllib3-2.2.2.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/StickyHours/app_packages.iphonesimulator" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/StickyHours/app_packages.iphonesimulator/certifi-2024.7.4.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/StickyHours/app_packages.iphonesimulator/charset_normalizer-3.3.2.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/StickyHours/app_packages.iphonesimulator/fonttools-4.53.1.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/StickyHours/app_packages.iphonesimulator/idna-3.7.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/StickyHours/app_packages.iphonesimulator/requests-2.32.3.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/StickyHours/app_packages.iphonesimulator/rubicon_objc-0.4.9.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/StickyHours/app_packages.iphonesimulator/std_nslog-1.0.3.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/StickyHours/app_packages.iphonesimulator/toga_core-0.4.5.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/StickyHours/app_packages.iphonesimulator/toga_iOS-0.4.5.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/StickyHours/app_packages.iphonesimulator/travertino-0.3.0.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/StickyHours/app_packages.iphonesimulator/urllib3-2.2.2.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/Support" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/build" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/build/Debug-iphonesimulator/Sticky Hours.app/app/commonfreehours-0.0.1.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/build/Debug-iphonesimulator/Sticky Hours.app/app_packages/certifi-2024.7.4.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/build/Debug-iphonesimulator/Sticky Hours.app/app_packages/charset_normalizer-3.3.2.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/build/Debug-iphonesimulator/Sticky Hours.app/app_packages/fonttools-4.53.1.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/build/Debug-iphonesimulator/Sticky Hours.app/app_packages/idna-3.7.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/build/Debug-iphonesimulator/Sticky Hours.app/app_packages/requests-2.32.3.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/build/Debug-iphonesimulator/Sticky Hours.app/app_packages/rubicon_objc-0.4.9.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/build/Debug-iphonesimulator/Sticky Hours.app/app_packages/std_nslog-1.0.3.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/build/Debug-iphonesimulator/Sticky Hours.app/app_packages/toga_core-0.4.5.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/build/Debug-iphonesimulator/Sticky Hours.app/app_packages/toga_iOS-0.4.5.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/build/Debug-iphonesimulator/Sticky Hours.app/app_packages/travertino-0.3.0.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/build/Debug-iphonesimulator/Sticky Hours.app/app_packages/urllib3-2.2.2.dist-info" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.12 (CommonFreeHours-app)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
