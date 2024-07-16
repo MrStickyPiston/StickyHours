@@ -1,5 +1,6 @@
 import java
 
+
 def open_url(url):
     Intent = java.jclass("android.content.Intent")
     Uri = java.jclass("android.net.Uri")
@@ -9,6 +10,7 @@ def open_url(url):
     currentActivity = PythonActivity.singletonThis
     currentActivity.startActivity(intent)
 
+
 def get_locale():
     Resources = java.jclass('android.content.res.Resources')
 
@@ -17,5 +19,3 @@ def get_locale():
 
     locale_list = configuration.getLocales()
     return locale_list.get(0).toString()
-
-    return java.jclass('java.util.Locale').getDefault()

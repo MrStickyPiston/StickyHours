@@ -204,7 +204,7 @@ class CommonFreeHours(toga.App):
         main_box.add(self.compute_button)
 
         if toga.platform.get_current_platform() == 'iOS':
-            main_box.add(toga.Button(_('command.logout'), on_press=self.logout_trigger))
+            main_box.add(toga.Button(_('command.logout'), on_press=self.logout_trigger, style=utils.button_style))
 
         main_box.add(self.result_box)
 
@@ -266,8 +266,8 @@ class CommonFreeHours(toga.App):
         is_teacherz_box.add(self.zermelo_teacher)
         zermelo_box.add(is_teacherz_box)
 
-        self.login_button = toga.Button(_('auth.button.idle'), on_press=self.login_scheduler)
-        self.login_help_button = toga.Button(_('auth.button.help'), on_press=self.login_help)
+        self.login_button = toga.Button(_('auth.button.idle'), on_press=self.login_scheduler, style=utils.button_style)
+        self.login_help_button = toga.Button(_('auth.button.help'), on_press=self.login_help, style=utils.button_style)
 
         # Add Zermelo section to main box
         self.login_box.add(zermelo_box)
