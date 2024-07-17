@@ -17,6 +17,7 @@ import urllib3.exceptions
 from commonfreehours import zapi, utils
 from toga.style import Pack
 from toga.style.pack import COLUMN, ROW
+import toga.platform
 from commonfreehours.commonFreeHours import free_common_hours
 from commonfreehours.lang import Lang
 
@@ -190,7 +191,7 @@ class CommonFreeHours(toga.App):
         compare_box.add(breaks_box)
 
         # Compute button
-        self.compute_button = toga.Button(_('main.button.idle'), on_press=self.compute_scheduler)
+        self.compute_button = toga.Button(_('main.button.idle'), on_press=self.compute_scheduler, style=utils.button_style)
 
         # Result
         self.result_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 5)))
@@ -201,6 +202,10 @@ class CommonFreeHours(toga.App):
         # Add Compare section to main box
         main_box.add(compare_box)
         main_box.add(self.compute_button)
+
+        if toga.platform.get_current_platform() == 'iOS':
+            main_box.add(toga.Button(_('command.logout'), on_press=self.logout_trigger, style=utils.button_style))
+
         main_box.add(self.result_box)
 
     def main(self):
@@ -261,8 +266,8 @@ class CommonFreeHours(toga.App):
         is_teacherz_box.add(self.zermelo_teacher)
         zermelo_box.add(is_teacherz_box)
 
-        self.login_button = toga.Button(_('auth.button.idle'), on_press=self.login_scheduler)
-        self.login_help_button = toga.Button(_('auth.button.help'), on_press=self.login_help)
+        self.login_button = toga.Button(_('auth.button.idle'), on_press=self.login_scheduler, style=utils.button_style)
+        self.login_help_button = toga.Button(_('auth.button.help'), on_press=self.login_help, style=utils.button_style)
 
         # Add Zermelo section to main box
         self.login_box.add(zermelo_box)
@@ -377,8 +382,8 @@ class CommonFreeHours(toga.App):
             global schedule
             global other_schedule
 
-            schedule = self.zermelo.sort_schedule(username=account1.id, teacher=account1.teacher)
-            other_schedule = self.zermelo.sort_schedule(username=account2.id, teacher=account2.teacher)
+            schedule = self.zermelo.sort_schedule(username=account1.id, teacher=account1.teacher, only_valid=True)
+            other_schedule = self.zermelo.sort_schedule(username=account2.id, teacher=account2.teacher, only_valid=True)
 
         async def error(user):
             await self.main_window.error_dialog(

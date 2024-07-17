@@ -8,7 +8,7 @@ class Lang:
         self.lang = utils.get_locale()
 
         self.languages = {
-            "en_US": {
+            "en": {
                 "command.group.account": "Account",
                 "command.logout": "Log out",
                 "main.accounts.1.title": "Account 1",
@@ -48,7 +48,7 @@ class Lang:
                 "auth.button.help": "Help"
             },
 
-            "nl_NL": {
+            "nl": {
                 "command.group.account": "Account",
                 "command.logout": "Afmelden",
                 "main.accounts.1.title": "Account 1",
@@ -92,24 +92,24 @@ class Lang:
 
         if not self.languages.get(self.lang):
             print('Defaulting to english')
-            self.lang = 'en_US'
+            self.lang = 'en'
 
     def translate(self, key: string):
 
-        value: string = self.languages.get(self.lang, self.languages.get('en_US')).get(key, '')
+        value: string = self.languages.get(self.lang, self.languages.get('en')).get(key, '')
 
         if value == '':
             print(f'Empty key: {self.lang}/{key}')
 
-            if self.lang == 'en_US':
+            if self.lang == 'en':
                 return key
 
             # use the english version if not found normally
             # return the key if value is not found
-            value = self.languages.get('en_US').get(key, key)
+            value = self.languages.get('en').get(key, key)
 
             if value == '':
-                print(f'Empty key: en_US/{key}')
+                print(f'Empty key: en/{key}')
                 value = key
 
         return value
