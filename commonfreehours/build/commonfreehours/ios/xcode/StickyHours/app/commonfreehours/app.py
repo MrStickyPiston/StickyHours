@@ -382,8 +382,8 @@ class CommonFreeHours(toga.App):
             global schedule
             global other_schedule
 
-            schedule = self.zermelo.sort_schedule(username=account1.id, teacher=account1.teacher)
-            other_schedule = self.zermelo.sort_schedule(username=account2.id, teacher=account2.teacher)
+            schedule = self.zermelo.sort_schedule(username=account1.id, teacher=account1.teacher, only_valid=True)
+            other_schedule = self.zermelo.sort_schedule(username=account2.id, teacher=account2.teacher, only_valid=True)
 
         async def error(user):
             await self.main_window.error_dialog(

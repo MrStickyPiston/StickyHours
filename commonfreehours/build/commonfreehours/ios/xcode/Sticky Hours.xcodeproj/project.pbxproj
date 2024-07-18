@@ -98,7 +98,7 @@
 				610000000000000000100800 /* Images.xcassets */,
 				60796EEC19190F4100A9926B /* Supporting Files */,
 			);
-			path = "StickyHours";
+			path = StickyHours;
 			sourceTree = "<group>";
 		};
 		60796EEC19190F4100A9926B /* Supporting Files */ = {
@@ -364,16 +364,17 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = J2WHF58P99;
 				ENABLE_BITCODE = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "StickyHours/StickyHours-Prefix.pch";
 				INFOPLIST_FILE = "StickyHours/StickyHours-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "dev.mrstickypiston.commonfreehours";
+				PRODUCT_BUNDLE_IDENTIFIER = dev.mrstickypiston.commonfreehours;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -383,17 +384,18 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = J2WHF58P99;
 				ENABLE_BITCODE = NO;
 				ENABLE_TESTABILITY = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "StickyHours/StickyHours-Prefix.pch";
 				INFOPLIST_FILE = "StickyHours/StickyHours-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "dev.mrstickypiston.commonfreehours";
+				PRODUCT_BUNDLE_IDENTIFIER = dev.mrstickypiston.commonfreehours;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
