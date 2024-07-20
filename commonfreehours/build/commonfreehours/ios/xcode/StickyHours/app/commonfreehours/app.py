@@ -43,6 +43,9 @@ class CommonFreeHours(toga.App):
         # Main window of the application
         self.main_window = toga.MainWindow(title=self.formal_name)
 
+        if toga.platform.get_current_platform() == 'iOS':
+            utils.set_bar_color(self)
+
         # Setup command for logout
         self.account_group = toga.command.Group(
             text=_('command.group.account'),
