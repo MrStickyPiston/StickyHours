@@ -1,88 +1,100 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
-MAX_TIME = timedelta(hours=6)
-
-
-def parse_schedule(schedule):
-    events = []
-    for week in schedule:
-        for day in week:
-            for event in day:
-                # lesson cancellation
-                if event[4][0].get('code') != 4007:
-                    events.append(event)
-    return events
+from commonfreehours.zapi import Zermelo
 
 
-def find_gaps(events):
-    gaps = []
-    # Sort events by start time
-    events.sort(key=lambda x: datetime.strptime(x[1], '%Y-%m-%d %H:%M'))
+def process_appointments(appointments):
+    # Preprocesses the appointments for getting the gaps
+    days = {}
+    gaps = {}
 
-    # Initialize variables
-    last_end_time = datetime.strptime(events[0][2], '%Y-%m-%d %H:%M')
+    previous_slot = None
+    previous_time = None
 
-    # Iterate over sorted events to find gaps
-    for event in events[1:]:
-        current_start_time = datetime.strptime(event[1], '%Y-%m-%d %H:%M')
-        if current_start_time > last_end_time:
-            gap_start = last_end_time
-            gap_end = current_start_time
-            gap_duration = gap_end - gap_start
-            if gap_duration <= MAX_TIME:
-                gaps.append((gap_start, gap_end))
-        last_end_time = max(last_end_time, datetime.strptime(event[2], '%Y-%m-%d %H:%M'))
+    appointments.sort(key=lambda arr: arr.get('start'))
 
+    for a in appointments:
+        # Check if list is empty
+        if not a.get('groups'):
+            continue
+
+        s = a["startTimeSlot"]
+        e = a["endTimeSlot"]
+
+        st = datetime.fromtimestamp(a.get('start'))
+        et = datetime.fromtimestamp(a.get('end'))
+
+        d = str(datetime.fromtimestamp(a.get('start')).date())
+
+        if days.get(d) is None:
+            days[d] = []
+
+        if gaps.get(d) is None:
+            gaps[d] = []
+
+        elif previous_slot[1] + 1 < s:
+            gaps[d].append([[previous_slot[1] + 1, s - 1], [previous_time[1], st]])
+
+        previous_slot = [s, e]
+        previous_time = [st, et]
+
+        days[d].append([s, e])
     return gaps
 
+def get_common_gaps(*gaps):
+    # Returns common gaps between gap lists in a days dict
 
-def find_common_gaps(gaps1, gaps2, breaks):
-    common_gaps = []
+    # Return the first element of gaps when only one or less is supplied
+    # Throws an indexerror if no args are supplied
+    if len(gaps) <= 1:
+        return gaps[0]
 
-    for gap1 in gaps1:
-        for gap2 in gaps2:
-            overlap_start = max(gap1[0], gap2[0])
-            overlap_end = min(gap1[1], gap2[1])
-            if overlap_start < overlap_end:
-                if overlap_end - overlap_start < timedelta(minutes=21):
-                    if breaks:
-                        common_gaps.append((overlap_start, overlap_end))
-                else:
-                    common_gaps.append((overlap_start, overlap_end))
+    common_gaps = {}
+
+    # Convert tuple to list for popping
+    gaps = list(gaps)
+
+    gaps_a = gaps.pop()
+    gaps_b = gaps.pop()
+
+    # Iter through all days
+    for date in set(gaps_a.keys()).union(set(gaps_b.keys())):
+        if not gaps_a.get(date):
+            continue
+        for gap_a in gaps_a.get(date):
+            if not gaps_b.get(date):
+                continue
+            for gap_b in gaps_b.get(date):
+                overlap_start_slot = max(gap_a[0][0], gap_b[0][0])
+                overlap_end_slot = min(gap_a[0][1], gap_b[0][1])
+
+                if overlap_start_slot <= overlap_end_slot:
+
+                    # Create day if it does not exist
+                    if common_gaps.get(date) is None:
+                        common_gaps[date] = []
+
+                    # Add gap to list
+                    common_gaps[date].append([[overlap_start_slot, overlap_end_slot], [max(gap_a[1][0], gap_b[1][0]), min(gap_a[1][1], gap_b[1][1])]])
+
+    if len(gaps) >= 1:
+        return get_common_gaps(common_gaps, *gaps)
 
     return common_gaps
 
+def get_accounts(zermelo: Zermelo, schoolInSchoolYear: int):
+    students = zermelo.get_students(schoolInSchoolYear, "firstName,prefix,lastName,student")
+    teachers = zermelo.get_teachers(schoolInSchoolYear, "employee,prefix,lastName")
 
-def free_common_hours(schedule1, schedule2, breaks):
-    events1 = parse_schedule(schedule1)
-    events2 = parse_schedule(schedule2)
+    accounts = []
 
-    gaps1 = find_gaps(events1)
-    gaps2 = find_gaps(events2)
+    for teacher in teachers:
+        name = f"{teacher['prefix']} {teacher['lastName']}" if teacher['prefix'] else f"{teacher['lastName']}"
+        accounts.append({"name": f"{name} ({teacher['employee']})", "id": teacher['employee'], 'teacher': True})
 
-    common_gaps = find_common_gaps(gaps1, gaps2, breaks)
+    # Process the student list
+    for student in students:
+        name = f"{student['firstName']} {student['prefix']} {student['lastName']}" if student['prefix'] else f"{student['firstName']} {student['lastName']}"
+        accounts.append({"name": f"{name} ({student['student']})", "id": student['student'], 'teacher': False})
 
-    common_free_hours = []
-
-    for gap in common_gaps:
-
-        if gap[1] - gap[0] < timedelta(minutes=21):
-            common_free_hours.append(
-                {
-                    'break': True,
-                    'start': gap[0],
-                    'end': gap[1]
-                }
-            )
-        elif gap[1] - gap[0] > timedelta(hours=6):
-            continue
-        else:
-            common_free_hours.append(
-                {
-                    'break': False,
-                    'start': gap[0],
-                    'end': gap[1]
-                }
-            )
-
-    return common_free_hours
+    return accounts
