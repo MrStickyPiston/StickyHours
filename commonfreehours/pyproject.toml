@@ -22,7 +22,10 @@ test_sources = [
 ]
 
 requires = [
-    "requests"
+    "requests",
+    "pytz",
+    # Remove when no longer in development
+    "freezegun"
 ]
 test_requires = [
     "pytest",

@@ -1,5 +1,4 @@
 import toga
-from attr import attributes
 from toga.style import Pack
 from toga.constants import ROW
 from travertino.constants import COLUMN

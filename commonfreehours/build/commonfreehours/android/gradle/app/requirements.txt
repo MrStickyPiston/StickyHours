@@ -1,3 +1,5 @@
-# Generated 2024-08-18 12:30:00.195070
+# Generated 2024-08-18 18:04:14.301402
 requests
+pytz
+freezegun
 toga-android~=0.4.5

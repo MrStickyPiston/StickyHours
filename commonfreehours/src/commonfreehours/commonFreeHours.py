@@ -5,7 +5,7 @@ import pytz
 from commonfreehours.zapi import Zermelo
 
 
-def process_appointments(appointments) -> dict[str, list]:
+def process_appointments(appointments) -> dict:
     # Preprocesses the appointments for getting the gaps
     days = {}
     gaps = {}
@@ -43,12 +43,13 @@ def process_appointments(appointments) -> dict[str, list]:
         days[d].append([s, e])
     return gaps
 
-def get_common_gaps(*gaps):
+def get_common_gaps(*gaps) ->  dict[list] | dict:
     # Returns common gaps between gap lists in a days dict
 
     # Return the first element of gaps when only one or less is supplied
-    # Throws an indexerror if no args are supplied
-    if len(gaps) <= 1:
+    if len(gaps) == 0:
+        return {}
+    elif len(gaps) == 1:
         return gaps[0]
 
     common_gaps = {}

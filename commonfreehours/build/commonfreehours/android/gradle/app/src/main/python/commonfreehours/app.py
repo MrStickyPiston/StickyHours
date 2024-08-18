@@ -7,7 +7,9 @@ import logging
 import pathlib
 import traceback
 from enum import Enum
+from typing import List
 
+import freezegun
 import toga
 import configparser
 
@@ -15,7 +17,7 @@ from toga.style import Pack
 from toga.style.pack import COLUMN, ROW
 import toga.platform
 from commonfreehours.lang import Lang
-from .commonFreeHours import get_accounts
+from .commonFreeHours import get_accounts, process_appointments, get_common_gaps
 from .accountentry import AccountEntry
 
 from .zapi import *
@@ -29,11 +31,13 @@ class FontSize(Enum):
     big = 22
 
 
+@freezegun.freeze_time("2024-6-12")
 class CommonFreeHours(toga.App):
     def __init__(self):
         super().__init__()
         self.main_loaded = False
         self.accounts = []
+        self.common_gaps_cache = {}
 
         self.zermelo = Zermelo()
 
@@ -107,7 +111,7 @@ class CommonFreeHours(toga.App):
         if self.accounts:
             return self.accounts
         try:
-            self.accounts = get_accounts(self.zermelo, 2023)
+            self.accounts = get_accounts(self.zermelo, get_school_year())
             return self.accounts
         except ZermeloAuthException:
             return []
@@ -129,7 +133,7 @@ class CommonFreeHours(toga.App):
         self.main_container = toga.ScrollContainer(content=main_box, horizontal=False)
 
         self.entry_box = toga.Box(style=Pack(direction=COLUMN))
-        self.entries = []
+        self.entries: List[AccountEntry] = []
 
         add_button = toga.Button('Add Entry', on_press=self.add_entry, style=utils.button_style)
 
@@ -158,7 +162,7 @@ class CommonFreeHours(toga.App):
 
         self.logout_command.enabled = True
 
-        self.accounts = get_accounts(self.zermelo, 2023)
+        self.accounts = get_accounts(self.zermelo, get_school_year())
 
         if not self.entries:
             self.add_entry(value=self.zermelo.get_user().get('code'))
@@ -314,75 +318,56 @@ class CommonFreeHours(toga.App):
         asyncio.create_task(self.compute())
 
     async def compute(self):
-        def set_schedules():
-            global schedule
-            global other_schedule
+        def sync():
+            gaps = []
 
-            schedule = self.zermelo.sort_schedule(username=account1.id, teacher=account1.teacher, only_valid=True)
-            other_schedule = self.zermelo.sort_schedule(username=account2.id, teacher=account2.teacher, only_valid=True)
+            for v in set(entries):
+                # TODO: input weeks amount
+                self.compute_button.text = _('main.button.fetching')
+                self.logger.info(f"Fetching {v.id}")
 
-        async def error(user):
-            await self.main_window.error_dialog(
-                _('main.error.no-schedule.title'),
-                _('main.error.no-schedule.message').format(user)
-            )
+                a = self.zermelo.get_current_weeks_appointments(user=v.id, is_teacher=v.teacher)
+                if not a:
+                    # TODO: Tell user no schedule found
+                    break
+                print(f"Preprocessing {v.id}")
+                self.compute_button.text = _('main.button.preprocessing')
+                g = process_appointments(a)
+                if not g:
+                    # TODO: Tell user no gaps are found for this user
+                    break
+                gaps.append(g)
 
-            self.compute_button.text = _('main.button.idle')
+            self.compute_button.text = _('main.button.processing')
+            self.common_gaps_cache = get_common_gaps(*gaps)
+
+        def done():
             self.compute_button.enabled = True
+            self.compute_button.text = _('main.button.idle')
 
         await asyncio.sleep(0)  # Yield to event loop briefly
         loop = asyncio.get_event_loop()
 
         self.compute_button.enabled = False
-        self.compute_button.text = _('main.button.fetching')
 
-        def is_day_later(date1, date2):
-            # Extract dates without time
-            date1_date_only = date1.date()
-            date2_date_only = date2.date()
+        entries = []
+        ids = []
 
-            # Calculate the difference between the dates
-            date_diff = date2_date_only - date1_date_only
-
-            # Check if the difference is exactly one day
-            return date_diff >= datetime.timedelta(days=1)
-
-        account1 = self.name1_selection.value
-
-        account2 = self.name2_selection.value
-
-        show_breaks = self.show_breaks.value
-
-        if account1 is None:
-            await error(
-                self.name1_input.value.strip() if self.name1_input.value.strip() != '' else _('main.accounts.1.title'))
-            return
-        if account2 is None:
-            await error(
-                self.name2_input.value.strip() if self.name1_input.value.strip() != '' else _('main.accounts.2.title'))
-            return
+        # Keep requests down to a minimum by removing duplicates.
+        for entry in self.entries:
+            if entry.get_value().id not in ids:
+                entries.append(entry.get_value())
+                ids.append(entry.get_value().id)
 
         try:
-            await loop.run_in_executor(None, set_schedules)
-
-        except ValueError:
-            # If zermelo auth expired
-            self.logout_zermelo()
-            await self.main_window.info_dialog(_('auth.error.expired.title'), _('auth.error.expired.message'))
-            self.compute_button.text = _('main.button.idle')
-            self.compute_button.enabled = True
-            return
-
-        if not schedule:
-            await error(account1.name)
-            return
-        if not other_schedule:
-            await error(account2.name)
-            return
-
-        self.compute_button.text = _('main.button.processing')
-
-        hours = free_common_hours(schedule, other_schedule, show_breaks)
+            # TODO: fix async gtk bug
+            #await loop.run_in_executor(None, sync)
+            sync()
+        except Exception as e:
+            # TODO: implement ZermeloApiNetworkError
+            done()
+            await self.main_window.stack_trace_dialog(_('main.message.failed.title'), _('main.message.failed.error'), str(traceback.format_exc()))
+            raise e
 
         self.compute_button.text = _('main.button.listing')
 
@@ -390,31 +375,26 @@ class CommonFreeHours(toga.App):
 
         self.result_box.add(
             toga.Label(_('main.results.header'), style=Pack(font_size=FontSize.big.value)))
-        self.result_box.add(
+
+        for entry in entries:
+            self.result_box.add(
             toga.Label(
-                f"{_('main.accounts.1.title')}: {account1.name}\n{_('main.accounts.2.title')}: {account2.name}\n{_('main.breaks.show')}: {_('common.yes') if show_breaks else _('common.no')}",
+                entry.name,
                 style=Pack(font_size=FontSize.small.value)))
 
-        day = datetime.datetime.fromtimestamp(datetime.MINYEAR)
+        for day in self.common_gaps_cache.keys():
+            if not self.common_gaps_cache.get(day):
+                continue
 
-        for hour in hours:
-            if is_day_later(day, hour.get('start')):
-                day = hour.get('start')
-                self.result_box.add(toga.Label(hour.get('start').strftime('\n%A %d %B %Y'),
-                                               style=Pack(font_size=FontSize.large.value)))
-
-            if not hour.get('break'):
+            self.result_box.add(toga.Label(self.common_gaps_cache.get(day)[0][1][0].strftime('\n%A %d %B %Y'),
+                                                 style=Pack(font_size=FontSize.large.value)))
+            for gap in self.common_gaps_cache.get(day):
                 self.result_box.add(toga.Label(
-                    f"{hour.get('start').strftime('%H:%M')} - {hour.get('end').strftime('%H:%M')} ({hour.get('end') - hour.get('start')})",
-                    style=Pack(font_size=FontSize.small.value)))
-            elif show_breaks:
-                self.result_box.add(toga.Label(
-                    f"[{_('main.results.break.indicator.text')}] {hour.get('start').strftime('%H:%M')} - {hour.get('end').strftime('%H:%M')} ({hour.get('end') - hour.get('start')})",
+                    f"{gap[1][0].strftime('%H:%M')} - {gap[1][1].strftime('%H:%M')} ({gap[1][1] - gap[1][0]})",
                     style=Pack(font_size=FontSize.small.value)))
 
-        if not hours:
-            self.result_box.add(toga.Label(f'\n{_('main.results.none')}',
-                                           style=Pack(font_size=FontSize.large.value)))
+        if not self.common_gaps_cache:
+            self.result_box.add(toga.Label(f'\n{_('main.results.none')}', style=Pack(font_size=FontSize.large.value)))
 
         self.compute_button.text = _('main.button.idle')
         self.compute_button.enabled = True
