@@ -2,24 +2,25 @@
 Easily check for common free hours in zermelo.
 """
 import asyncio
-import binascii
 import datetime
+import logging
 import pathlib
-import urllib
+import traceback
 from enum import Enum
 
-import requests
 import toga
 import configparser
 
-import urllib3.exceptions
-
-from commonfreehours import zapi, utils
 from toga.style import Pack
 from toga.style.pack import COLUMN, ROW
 import toga.platform
-from commonfreehours.commonFreeHours import free_common_hours
 from commonfreehours.lang import Lang
+from .commonFreeHours import get_accounts
+from .accountentry import AccountEntry
+
+from .zapi import *
+import commonfreehours.utils as utils
+from .zapi.zermelo import get_school_year
 
 
 class FontSize(Enum):
@@ -34,12 +35,19 @@ class CommonFreeHours(toga.App):
         self.main_loaded = False
         self.accounts = []
 
+        self.zermelo = Zermelo()
+
+        self.logger = logging.getLogger(__name__)
+        logging.basicConfig(level=logging.DEBUG)
+
         global _
 
         self.lang = Lang()
         _ = self.lang.translate
 
     def startup(self):
+        print(self.paths.data)
+        self.logger.info("method startup called")
         # Main window of the application
         self.main_window = toga.MainWindow(title=self.formal_name)
 
@@ -57,14 +65,8 @@ class CommonFreeHours(toga.App):
 
         self.commands.add(self.logout_command)
 
-        self.config = configparser.ConfigParser()
+        self.config = configparser.ConfigParser(allow_no_value=True)
         self.config.read(self.paths.data / 'commonFreeHours.ini')
-        self.config['DEFAULT'] = {
-            'user1': '',
-            'user1teacher': False,
-            'user2': '',
-            'user2teacher': False
-        }
 
         if 'user' not in self.config.sections():
             self.config['user'] = {}
@@ -72,40 +74,23 @@ class CommonFreeHours(toga.App):
         self.user_config = self.config['user']
 
         self.login_setup()
+        self.main_setup()
 
-        if self.user_config.get('school') is None or self.user_config.get('account_name') is None:
+        if not self.user_config.get('instance_id') or not self.user_config.get('account_name') or not self.user_config.get('token'):
+            self.logger.info(f"None value in user in config, logging in again.")
             self.login_view()
         else:
             try:
-                self.zermelo = zapi.zermelo(
-                    self.user_config.get('school'),
-                    self.user_config.get('account_name'),
-                    teacher=self.user_config.get('teacher'),
-                    version=3,
-                    token_file=self.paths.data / 'ZToken'
-                )
+                self.zermelo.token_login(self.user_config.get('token'), self.user_config.get('instance_id'))
+                self.main()
+                print(
+                    f"Used existing zermelo instance as {self.user_config.get('account_name')} on {self.user_config.get('school')} with teacher={self.user_config.get('teacher')}")
 
-                try:
-                    self.schoolInSchoolYear = self.zermelo.getSchoolInSchoolYear(self.zermelo.getSchoolInSchoolYears())
-                    self.accounts = self.zermelo.getAccounts(self.schoolInSchoolYear)
-
-                    self.main_setup()
-                    self.main_loaded = True
-
-                    print(
-                        f"Used existing zermelo instance as {self.user_config.get('account_name')} on {self.user_config.get('school')} with teacher={self.user_config.get('teacher')}")
-                    self.main()
-                except ValueError:
-                    # If zermelo auth expired
-                    self.logout_zermelo()
-            except (
-                    binascii.Error,  #
-                    ValueError,  # For incorrect config file no token
-                    urllib3.exceptions.LocationParseError,  # Catch zermelo 404
-                    requests.exceptions.ConnectionError  # Invalid url
-            ):
-                self.logout_zermelo()
-            # Set the main window's content
+            except ZermeloAuthException as e:
+                self.logger.info("Logging in failed")
+                self.logger.debug(f"Logging in error: {e}")
+                # Token invalid, log in again
+                pass
 
         self.main_window.show()
 
@@ -114,81 +99,42 @@ class CommonFreeHours(toga.App):
         self.name1_selection.items = options
 
     async def on_change_query_2(self, widget: toga.TextInput):
-        options = [option for option in self.accounts if widget.value.lower() in option.get('name').lower()]
+        options = []
         self.name2_selection.items = options
 
-    def main_setup(self):
+    def get_account_options(self):
+        #TODO: replace school year
+        if self.accounts:
+            return self.accounts
+        try:
+            self.accounts = get_accounts(self.zermelo, 2023)
+            return self.accounts
+        except ZermeloAuthException:
+            return []
 
+    def add_entry(self, widget=None, value=None):
+        new_entry = AccountEntry(controller=self, options_func=self.get_account_options, value=value)
+
+        self.entries.append(new_entry)
+        self.entry_box.add(new_entry.box)  # Insert before buttons
+
+    def remove_entry(self, entry: AccountEntry):
+        self.entries.remove(entry)
+        self.entry_box.remove(entry.box)
+
+    def main_setup(self):
         # Main box to hold all widgets
         main_box = toga.Box(style=Pack(direction=COLUMN, padding=10))
+
         self.main_container = toga.ScrollContainer(content=main_box, horizontal=False)
 
-        # Compare section
-        compare_box = toga.Box(style=Pack(direction=COLUMN))
+        self.entry_box = toga.Box(style=Pack(direction=COLUMN))
+        self.entries = []
 
-        # Account name 1
-        account1_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 0, 10, 0)))
+        add_button = toga.Button('Add Entry', on_press=self.add_entry, style=utils.button_style)
 
-        name1_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 5)))
-
-        name1_box.add(
-            toga.Label(_('main.accounts.1.title'), style=Pack(font_size=FontSize.large.value)))
-
-        self.name1_input = toga.TextInput(
-            style=Pack(flex=1, padding=(0, 5)),
-            on_change=self.on_change_query_1
-        )
-
-        name1_box.add(toga.Label(_('main.accounts.search'), style=Pack(padding=(0, 5), font_size=FontSize.small.value)))
-
-        name1_box.add(self.name1_input)
-
-        self.name1_selection = toga.Selection(items=self.accounts,
-                                              accessor='name',
-                                              style=Pack(flex=1, padding=(0, 5)))
-        name1_box.add(self.name1_selection)
-        account1_box.add(name1_box)
-
-        compare_box.add(account1_box)
-
-        # Account name 2
-        account2_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 0, 10, 0)))
-
-        name2_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 5)))
-
-        name2_box.add(
-            toga.Label(_('main.accounts.2.title'), style=Pack(font_size=FontSize.large.value)))
-
-        self.name2_input = toga.TextInput(
-            style=Pack(flex=1, padding=(0, 5)),
-            on_change=self.on_change_query_2
-        )
-
-        name2_box.add(toga.Label(_('main.accounts.search'), style=Pack(padding=(0, 5), font_size=FontSize.small.value)))
-
-        name2_box.add(self.name2_input)
-
-        self.name2_selection = toga.Selection(items=self.accounts,
-                                              accessor='name',
-                                              style=Pack(flex=1, padding=(0, 5)))
-        name2_box.add(self.name2_selection)
-        account2_box.add(name2_box)
-
-        compare_box.add(account2_box)
-
-        # Breaks
-        breaks_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 0, 10, 0)))
-
-        breaks_box.add(toga.Label(_('main.breaks.header'), style=Pack(padding=(0, 5), font_size=FontSize.large.value)))
-
-        self.show_breaks = toga.Switch('', style=Pack(padding=(0, 5), font_size=FontSize.large.value))
-        show_breaks_box = toga.Box(style=Pack(direction=ROW, padding=(0, 5)))
-        show_breaks_box.add(
-            toga.Label(_('main.breaks.show'), style=Pack(padding=(0, 5), font_size=FontSize.small.value)))
-        show_breaks_box.add(self.show_breaks)
-        breaks_box.add(show_breaks_box)
-
-        compare_box.add(breaks_box)
+        main_box.add(self.entry_box)
+        main_box.add(add_button)
 
         # Compute button
         self.compute_button = toga.Button(_('main.button.idle'), on_press=self.compute_scheduler, style=utils.button_style)
@@ -200,7 +146,6 @@ class CommonFreeHours(toga.App):
         self.result_box.add(result_label)
 
         # Add Compare section to main box
-        main_box.add(compare_box)
         main_box.add(self.compute_button)
 
         if toga.platform.get_current_platform() == 'iOS':
@@ -212,6 +157,11 @@ class CommonFreeHours(toga.App):
         self.main_window.title = self.formal_name
 
         self.logout_command.enabled = True
+
+        self.accounts = get_accounts(self.zermelo, 2023)
+
+        if not self.entries:
+            self.add_entry(value=self.zermelo.get_user().get('code'))
 
         self.main_window.content = self.main_container
 
@@ -259,13 +209,6 @@ class CommonFreeHours(toga.App):
 
         zermelo_box.add(password_box)
 
-        self.zermelo_teacher = toga.Switch('', style=Pack(font_size=FontSize.large.value))
-        is_teacherz_box = toga.Box(style=Pack(direction=ROW))
-        is_teacherz_box.add(
-            toga.Label(_('auth.is_teacher'), style=Pack(font_size=FontSize.small.value)))
-        is_teacherz_box.add(self.zermelo_teacher)
-        zermelo_box.add(is_teacherz_box)
-
         self.login_button = toga.Button(_('auth.button.idle'), on_press=self.login_scheduler, style=utils.button_style)
         self.login_help_button = toga.Button(_('auth.button.help'), on_press=self.login_help, style=utils.button_style)
 
@@ -282,7 +225,6 @@ class CommonFreeHours(toga.App):
 
         self.zermelo_school_input.value = self.user_config.get('school')
         self.zermelo_user_input.value = self.user_config.get('account_name')
-        self.zermelo_teacher.value = self.user_config.get('teacher') == 'True'
 
         self.main_window.content = self.login_box
 
@@ -291,44 +233,56 @@ class CommonFreeHours(toga.App):
         pass
 
     def login_scheduler(self, widget):
-        asyncio.create_task(self.login())
+        asyncio.create_task(self.login_task())
 
-    async def login(self):
-        def login_test():
-            zapi.zermelo(
-                school=self.zermelo_school_input.value.strip(),
-                username=self.zermelo_user_input.value.strip(),
-                teacher=self.zermelo_teacher.value,
-                password=self.zermelo_password.value,
-                version=3,
-                token_file=self.paths.data / 'ZToken',
+    async def login_task(self):
+        def login():
+            self.zermelo.password_login(
+                self.zermelo_school_input.value.strip(),
+                self.zermelo_user_input.value.strip(),
+                self.zermelo_password.value
             )
+
+        def done():
+            self.login_button.enabled = True
+            self.login_button.text = _('auth.button.idle')
 
         await asyncio.sleep(0)  # Yield to event loop briefly
         loop = asyncio.get_event_loop()
 
         if self.zermelo_school_input.value == '' or self.zermelo_user_input.value == '' or self.zermelo_password.value == '':
-            await self.main_window.error_dialog(_('auth.message.failed.title'), _('auth.message.failed.message.fields'))
+            await self.main_window.error_dialog(_('auth.message.failed.title'), _('auth.message.failed.fields'))
             return
 
         self.login_button.enabled = False
         self.login_button.text = _('auth.button.progress')
 
-        print(
-            f"Logging in as {self.zermelo_user_input.value} on {self.zermelo_school_input.value} with teacher={self.zermelo_teacher.value}")
+        self.logger.info(
+            f"Logging in as {self.zermelo_user_input.value} on {self.zermelo_school_input.value}")
 
         try:
-            await loop.run_in_executor(None, login_test)
-        except (RuntimeError, ValueError) as e:
-            print(e)
-            self.login_button.enabled = True
-            self.login_button.text = _('auth.button.idle')
-            await self.main_window.error_dialog(_('auth.message.failed.title'), _('auth.message.failed.message'))
-            return
+            await loop.run_in_executor(None, login)
+        except ZermeloValueError:
+            self.logger.info(f"Invalid instance id: {self.zermelo_school_input.value.strip()}")
+            done()
+            await self.main_window.error_dialog(_('auth.message.failed.title'), _('auth.message.failed.instance_id'))
 
-        self.user_config['school'] = self.zermelo_school_input.value.strip()
+            return
+        except ZermeloAuthException:
+            self.logger.info(f"Invalid username or password")
+            done()
+            await self.main_window.error_dialog(_('auth.message.failed.title'), _('auth.message.failed.credentials'))
+
+            return
+        except Exception as e:
+            # TODO: implement ZermeloApiNetworkError
+            done()
+            await self.main_window.stack_trace_dialog(_('auth.message.failed.title'), _('auth.message.failed.error'), str(traceback.format_exc()))
+            raise e
+
         self.user_config['account_name'] = self.zermelo_user_input.value.strip()
-        self.user_config['teacher'] = str(self.zermelo_teacher.value)
+        self.user_config['instance_id'] = self.zermelo_school_input.value.strip()
+        self.user_config['token'] = self.zermelo.get_token()
 
         print("Logged in successfully")
 
@@ -337,26 +291,7 @@ class CommonFreeHours(toga.App):
 
         print("Saved config")
 
-        self.zermelo = zapi.zermelo(
-            self.user_config.get('school'),
-            self.user_config.get('account_name'),
-            teacher=self.user_config.get('is_teacher'),
-            version=3,
-            token_file=self.paths.data / 'ZToken'
-        )
-
-        print(
-            f"Created new zermelo instance as {self.zermelo_user_input.value} on {self.zermelo_school_input.value} with teacher={self.zermelo_teacher.value}")
-
-        if not self.main_loaded:
-            self.schoolInSchoolYear = self.zermelo.getSchoolInSchoolYear(self.zermelo.getSchoolInSchoolYears())
-            self.accounts = self.zermelo.getAccounts(self.schoolInSchoolYear)
-
-            self.main_setup()
-            self.main_loaded = True
-
-        self.login_button.enabled = True
-        self.login_button.text = _('auth.button.idle')
+        done()
 
         self.main()
 
@@ -369,7 +304,8 @@ class CommonFreeHours(toga.App):
             print("Cancelled logging out")
 
     def logout_zermelo(self):
-        pathlib.Path(self.paths.data / 'ZToken').unlink(missing_ok=True)
+        self.zermelo.logout()
+        self.user_config['token'] = None
         self.login_view()
 
         print("Logged out")

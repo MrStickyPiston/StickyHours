@@ -7,7 +7,9 @@ import logging
 import pathlib
 import traceback
 from enum import Enum
+from typing import List
 
+import freezegun
 import toga
 import configparser
 
@@ -15,9 +17,13 @@ from toga.style import Pack
 from toga.style.pack import COLUMN, ROW
 import toga.platform
 from commonfreehours.lang import Lang
+from .commonFreeHours import get_accounts, process_appointments, get_common_gaps
+from .accountentry import AccountEntry
 
 from .zapi import *
 import commonfreehours.utils as utils
+from .zapi.zermelo import get_school_year
+
 
 class FontSize(Enum):
     small = 14
@@ -25,11 +31,14 @@ class FontSize(Enum):
     big = 22
 
 
+@freezegun.freeze_time("2024-6-12")
 class CommonFreeHours(toga.App):
     def __init__(self):
         super().__init__()
         self.main_loaded = False
         self.accounts = []
+
+        self.zermelo = Zermelo()
 
         self.logger = logging.getLogger(__name__)
         logging.basicConfig(level=logging.DEBUG)
@@ -59,7 +68,7 @@ class CommonFreeHours(toga.App):
 
         self.commands.add(self.logout_command)
 
-        self.config = configparser.ConfigParser()
+        self.config = configparser.ConfigParser(allow_no_value=True)
         self.config.read(self.paths.data / 'commonFreeHours.ini')
 
         if 'user' not in self.config.sections():
@@ -68,8 +77,7 @@ class CommonFreeHours(toga.App):
         self.user_config = self.config['user']
 
         self.login_setup()
-
-        self.zermelo = Zermelo()
+        self.main_setup()
 
         if not self.user_config.get('instance_id') or not self.user_config.get('account_name') or not self.user_config.get('token'):
             self.logger.info(f"None value in user in config, logging in again.")
@@ -77,9 +85,6 @@ class CommonFreeHours(toga.App):
         else:
             try:
                 self.zermelo.token_login(self.user_config.get('token'), self.user_config.get('instance_id'))
-
-                self.main_setup()
-                self.main_loaded = True
                 self.main()
                 print(
                     f"Used existing zermelo instance as {self.user_config.get('account_name')} on {self.user_config.get('school')} with teacher={self.user_config.get('teacher')}")
@@ -97,81 +102,42 @@ class CommonFreeHours(toga.App):
         self.name1_selection.items = options
 
     async def on_change_query_2(self, widget: toga.TextInput):
-        options = [option for option in self.accounts if widget.value.lower() in option.get('name').lower()]
+        options = []
         self.name2_selection.items = options
 
-    def main_setup(self):
+    def get_account_options(self):
+        #TODO: replace school year
+        if self.accounts:
+            return self.accounts
+        try:
+            self.accounts = get_accounts(self.zermelo, get_school_year())
+            return self.accounts
+        except ZermeloAuthException:
+            return []
 
+    def add_entry(self, widget=None, value=None):
+        new_entry = AccountEntry(controller=self, options_func=self.get_account_options, value=value)
+
+        self.entries.append(new_entry)
+        self.entry_box.add(new_entry.box)  # Insert before buttons
+
+    def remove_entry(self, entry: AccountEntry):
+        self.entries.remove(entry)
+        self.entry_box.remove(entry.box)
+
+    def main_setup(self):
         # Main box to hold all widgets
         main_box = toga.Box(style=Pack(direction=COLUMN, padding=10))
+
         self.main_container = toga.ScrollContainer(content=main_box, horizontal=False)
 
-        # Compare section
-        compare_box = toga.Box(style=Pack(direction=COLUMN))
+        self.entry_box = toga.Box(style=Pack(direction=COLUMN))
+        self.entries: List[AccountEntry] = []
 
-        # Account name 1
-        account1_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 0, 10, 0)))
+        add_button = toga.Button('Add Entry', on_press=self.add_entry, style=utils.button_style)
 
-        name1_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 5)))
-
-        name1_box.add(
-            toga.Label(_('main.accounts.1.title'), style=Pack(font_size=FontSize.large.value)))
-
-        self.name1_input = toga.TextInput(
-            style=Pack(flex=1, padding=(0, 5)),
-            on_change=self.on_change_query_1
-        )
-
-        name1_box.add(toga.Label(_('main.accounts.search'), style=Pack(padding=(0, 5), font_size=FontSize.small.value)))
-
-        name1_box.add(self.name1_input)
-
-        self.name1_selection = toga.Selection(items=self.accounts,
-                                              accessor='name',
-                                              style=Pack(flex=1, padding=(0, 5)))
-        name1_box.add(self.name1_selection)
-        account1_box.add(name1_box)
-
-        compare_box.add(account1_box)
-
-        # Account name 2
-        account2_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 0, 10, 0)))
-
-        name2_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 5)))
-
-        name2_box.add(
-            toga.Label(_('main.accounts.2.title'), style=Pack(font_size=FontSize.large.value)))
-
-        self.name2_input = toga.TextInput(
-            style=Pack(flex=1, padding=(0, 5)),
-            on_change=self.on_change_query_2
-        )
-
-        name2_box.add(toga.Label(_('main.accounts.search'), style=Pack(padding=(0, 5), font_size=FontSize.small.value)))
-
-        name2_box.add(self.name2_input)
-
-        self.name2_selection = toga.Selection(items=self.accounts,
-                                              accessor='name',
-                                              style=Pack(flex=1, padding=(0, 5)))
-        name2_box.add(self.name2_selection)
-        account2_box.add(name2_box)
-
-        compare_box.add(account2_box)
-
-        # Breaks
-        breaks_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 0, 10, 0)))
-
-        breaks_box.add(toga.Label(_('main.breaks.header'), style=Pack(padding=(0, 5), font_size=FontSize.large.value)))
-
-        self.show_breaks = toga.Switch('', style=Pack(padding=(0, 5), font_size=FontSize.large.value))
-        show_breaks_box = toga.Box(style=Pack(direction=ROW, padding=(0, 5)))
-        show_breaks_box.add(
-            toga.Label(_('main.breaks.show'), style=Pack(padding=(0, 5), font_size=FontSize.small.value)))
-        show_breaks_box.add(self.show_breaks)
-        breaks_box.add(show_breaks_box)
-
-        compare_box.add(breaks_box)
+        main_box.add(self.entry_box)
+        main_box.add(add_button)
 
         # Compute button
         self.compute_button = toga.Button(_('main.button.idle'), on_press=self.compute_scheduler, style=utils.button_style)
@@ -183,7 +149,6 @@ class CommonFreeHours(toga.App):
         self.result_box.add(result_label)
 
         # Add Compare section to main box
-        main_box.add(compare_box)
         main_box.add(self.compute_button)
 
         if toga.platform.get_current_platform() == 'iOS':
@@ -195,6 +160,11 @@ class CommonFreeHours(toga.App):
         self.main_window.title = self.formal_name
 
         self.logout_command.enabled = True
+
+        self.accounts = get_accounts(self.zermelo, get_school_year())
+
+        if not self.entries:
+            self.add_entry(value=self.zermelo.get_user().get('code'))
 
         self.main_window.content = self.main_container
 
@@ -324,10 +294,6 @@ class CommonFreeHours(toga.App):
 
         print("Saved config")
 
-        if not self.main_loaded:
-            self.main_setup()
-            self.main_loaded = True
-
         done()
 
         self.main()
@@ -341,7 +307,8 @@ class CommonFreeHours(toga.App):
             print("Cancelled logging out")
 
     def logout_zermelo(self):
-        pathlib.Path(self.paths.data / 'ZToken').unlink(missing_ok=True)
+        self.zermelo.logout()
+        self.user_config['token'] = None
         self.login_view()
 
         print("Logged out")
@@ -350,13 +317,6 @@ class CommonFreeHours(toga.App):
         asyncio.create_task(self.compute())
 
     async def compute(self):
-        def set_schedules():
-            global schedule
-            global other_schedule
-
-            schedule = self.zermelo.sort_schedule(username=account1.id, teacher=account1.teacher, only_valid=True)
-            other_schedule = self.zermelo.sort_schedule(username=account2.id, teacher=account2.teacher, only_valid=True)
-
         async def error(user):
             await self.main_window.error_dialog(
                 _('main.error.no-schedule.title'),
@@ -370,7 +330,7 @@ class CommonFreeHours(toga.App):
         loop = asyncio.get_event_loop()
 
         self.compute_button.enabled = False
-        self.compute_button.text = _('main.button.fetching')
+
 
         def is_day_later(date1, date2):
             # Extract dates without time
@@ -383,42 +343,28 @@ class CommonFreeHours(toga.App):
             # Check if the difference is exactly one day
             return date_diff >= datetime.timedelta(days=1)
 
-        account1 = self.name1_selection.value
+        gaps = []
 
-        account2 = self.name2_selection.value
+        for entry in self.entries:
+            # TODO: input weeks amount
+            v = entry.get_value()
+            self.compute_button.text = _('main.button.fetching')
+            self.logger.info(f"Fetching {v.id}")
 
-        show_breaks = self.show_breaks.value
+            a = self.zermelo.get_current_weeks_appointments(user=v.id, is_teacher=v.teacher)
+            if not a:
+                # TODO: Tell user no schedule found
+                break
+            print(f"Preprocessing {entry}")
+            g = process_appointments(a)
+            if not g:
+                # TODO: Tell user no gaps are found for this user
+                break
+            gaps.append(g)
 
-        if account1 is None:
-            await error(
-                self.name1_input.value.strip() if self.name1_input.value.strip() != '' else _('main.accounts.1.title'))
-            return
-        if account2 is None:
-            await error(
-                self.name2_input.value.strip() if self.name1_input.value.strip() != '' else _('main.accounts.2.title'))
-            return
-
-        try:
-            await loop.run_in_executor(None, set_schedules)
-
-        except ValueError:
-            # If zermelo auth expired
-            self.logout_zermelo()
-            await self.main_window.info_dialog(_('auth.error.expired.title'), _('auth.error.expired.message'))
-            self.compute_button.text = _('main.button.idle')
-            self.compute_button.enabled = True
-            return
-
-        if not schedule:
-            await error(account1.name)
-            return
-        if not other_schedule:
-            await error(account2.name)
-            return
+        common_gaps = get_common_gaps(*gaps)
 
         self.compute_button.text = _('main.button.processing')
-
-        hours = free_common_hours(schedule, other_schedule, show_breaks)
 
         self.compute_button.text = _('main.button.listing')
 
@@ -426,31 +372,29 @@ class CommonFreeHours(toga.App):
 
         self.result_box.add(
             toga.Label(_('main.results.header'), style=Pack(font_size=FontSize.big.value)))
-        self.result_box.add(
-            toga.Label(
-                f"{_('main.accounts.1.title')}: {account1.name}\n{_('main.accounts.2.title')}: {account2.name}\n{_('main.breaks.show')}: {_('common.yes') if show_breaks else _('common.no')}",
-                style=Pack(font_size=FontSize.small.value)))
+        # self.result_box.add(
+        #     toga.Label(
+        #         f"{_('main.accounts.1.title')}: {account1.name}\n{_('main.accounts.2.title')}: {account2.name}\n{_('main.breaks.show')}: {_('common.yes') if show_breaks else _('common.no')}",
+        #         style=Pack(font_size=FontSize.small.value)))
 
         day = datetime.datetime.fromtimestamp(datetime.MINYEAR)
 
-        for hour in hours:
-            if is_day_later(day, hour.get('start')):
-                day = hour.get('start')
-                self.result_box.add(toga.Label(hour.get('start').strftime('\n%A %d %B %Y'),
-                                               style=Pack(font_size=FontSize.large.value)))
+        print(common_gaps)
 
-            if not hour.get('break'):
+        for day in common_gaps.keys():
+            print(day)
+            if not common_gaps.get(day):
+                continue
+
+            self.result_box.add(toga.Label(common_gaps.get(day)[0][1][0].strftime('\n%A %d %B %Y'),
+                                                 style=Pack(font_size=FontSize.large.value)))
+            for gap in common_gaps.get(day):
                 self.result_box.add(toga.Label(
-                    f"{hour.get('start').strftime('%H:%M')} - {hour.get('end').strftime('%H:%M')} ({hour.get('end') - hour.get('start')})",
-                    style=Pack(font_size=FontSize.small.value)))
-            elif show_breaks:
-                self.result_box.add(toga.Label(
-                    f"[{_('main.results.break.indicator.text')}] {hour.get('start').strftime('%H:%M')} - {hour.get('end').strftime('%H:%M')} ({hour.get('end') - hour.get('start')})",
+                    f"{gap[1][0].strftime('%H:%M')} - {gap[1][1].strftime('%H:%M')} ({gap[1][1] - gap[1][0]})",
                     style=Pack(font_size=FontSize.small.value)))
 
-        if not hours:
-            self.result_box.add(toga.Label(f'\n{_('main.results.none')}',
-                                           style=Pack(font_size=FontSize.large.value)))
+        if not common_gaps:
+            self.result_box.add(toga.Label(f'\n{_('main.results.none')}', style=Pack(font_size=FontSize.large.value)))
 
         self.compute_button.text = _('main.button.idle')
         self.compute_button.enabled = True

@@ -1,9 +1,11 @@
 from datetime import datetime
 
+import pytz
+
 from commonfreehours.zapi import Zermelo
 
 
-def process_appointments(appointments):
+def process_appointments(appointments) -> dict[str, list]:
     # Preprocesses the appointments for getting the gaps
     days = {}
     gaps = {}
@@ -21,10 +23,10 @@ def process_appointments(appointments):
         s = a["startTimeSlot"]
         e = a["endTimeSlot"]
 
-        st = datetime.fromtimestamp(a.get('start'))
-        et = datetime.fromtimestamp(a.get('end'))
+        st = datetime.fromtimestamp(a.get('start'), tz=pytz.timezone('Europe/Amsterdam'))
+        et = datetime.fromtimestamp(a.get('end'), tz=pytz.timezone('Europe/Amsterdam'))
 
-        d = str(datetime.fromtimestamp(a.get('start')).date())
+        d = str(datetime.fromtimestamp(a.get('start'), tz=pytz.timezone('Europe/Amsterdam')).date())
 
         if days.get(d) is None:
             days[d] = []
@@ -82,9 +84,9 @@ def get_common_gaps(*gaps):
 
     return common_gaps
 
-def get_accounts(zermelo: Zermelo, schoolInSchoolYear: int):
-    students = zermelo.get_students(schoolInSchoolYear, "firstName,prefix,lastName,student")
-    teachers = zermelo.get_teachers(schoolInSchoolYear, "employee,prefix,lastName")
+def get_accounts(zermelo: Zermelo, school_year: int):
+    students = zermelo.get_students(school_year, "firstName,prefix,lastName,student")
+    teachers = zermelo.get_teachers(school_year, "employee,prefix,lastName")
 
     accounts = []
 
