@@ -167,7 +167,7 @@ class zermelo:
             appointments = data["appointments"]
         return (appointments)
 
-    def sort_schedule(self, schedule=None, year=None, week=None, username=None, teacher=None):
+    def sort_schedule(self, schedule=None, year=None, week=None, username=None, teacher=None, only_valid=True):
         if (schedule == None):
             schedule = self.get_schedule(year=year, week=week, username=username, teacher=teacher)
         pdate = 0
@@ -188,6 +188,9 @@ class zermelo:
                 code = 2002
 
                 if not les["groups"]:
+                    continue
+
+                if only_valid and les["cancelled"] or not les["valid"] or les["moved"] or les["modified"]:
                     continue
 
                 if les["cancelled"] or not les["valid"]:

@@ -42,7 +42,7 @@ class Lang:
                 "main.results.break.indicator.text": "BREAK",
                 "main.results.none": "No common free hours found.",
                 "main.error.no-schedule.title": "No schedule found",
-                "main.error.no-schedule.message": "No schedule with gaps found for {}.",
+                "main.error.no-schedule.message": "No schedule (with gaps) found for {}.",
                 "auth.error.expired.title": "Session expired",
                 "auth.error.expired.message": "Please log in again to renew the session.",
                 "auth.button.help": "Help"
@@ -81,7 +81,7 @@ class Lang:
                 "main.results.break.indicator.text": "PAUZE",
                 "main.results.none": "Geen gezamelijke tussenuren.",
                 "main.error.no-schedule.title": "Geen rooster gevonden",
-                "main.error.no-schedule.message": "Geen rooster gevonden voor {}.",
+                "main.error.no-schedule.message": "Geen rooster (met tussenuren) gevonden voor {}.",
                 "auth.error.expired.title": "Sessie verlopen",
                 "auth.error.expired.message": "Log opnieuw in om de sessie te vernieuwen.",
                 "auth.button.help": "Hulp met inloggen"

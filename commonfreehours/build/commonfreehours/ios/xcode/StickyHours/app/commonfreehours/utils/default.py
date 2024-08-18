@@ -14,4 +14,4 @@ def open_url(url: string):
 
 
 def get_locale():
-    return locale.getdefaultlocale()[0].split('-')[0]
+    return locale.getlocale()[0].split('_')[0]

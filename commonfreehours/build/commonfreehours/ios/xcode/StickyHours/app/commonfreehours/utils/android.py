@@ -18,4 +18,4 @@ def get_locale():
     configuration = resources.getConfiguration()
 
     locale_list = configuration.getLocales()
-    return locale_list.get(0).toString().split('-')[0]
+    return locale_list.get(0).toString().split('_')[0]
