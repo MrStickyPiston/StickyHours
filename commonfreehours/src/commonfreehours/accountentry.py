@@ -18,7 +18,6 @@ class AccountEntry:
         # Text input to filter selector
         self.filter_input = toga.TextInput(on_change=self.filter_selector, placeholder="Filter...", style=Pack(flex=1))
         if value:
-            print('v,', value)
             self.filter_input.value = value
 
         # Remove button
@@ -32,7 +31,6 @@ class AccountEntry:
 
     def filter_selector(self, widget):
         filtered_items = [option for option in self.options_func() if widget.value.lower() in option.get('name').lower()]
-        print(filtered_items)
         self.selector.items = filtered_items
 
     def remove_entry(self, widget):

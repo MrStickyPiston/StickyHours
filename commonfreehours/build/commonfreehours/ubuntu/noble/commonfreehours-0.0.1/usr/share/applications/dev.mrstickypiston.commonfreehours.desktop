@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Sticky Hours
+Exec=/usr/bin/commonfreehours %F
+Icon=dev.mrstickypiston.commonfreehours
+Categories=Utility;
+Comment=Easily check for common free hours in zermelo.

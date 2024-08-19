@@ -83,8 +83,7 @@ class Zermelo:
             return self._settings.get(school_year)
 
         SISYs = self.get_user().get('schoolInSchoolYears')
-        print(self.get_user())
-        print('sisys', SISYs)
+        self.logger.info(f"SchoolInSchoolYears: {SISYs}")
 
         params = {
             "archived": "false",
@@ -96,7 +95,6 @@ class Zermelo:
         d = self.send_request('GET', 'schoolfunctionsettings', params=params)
 
         try:
-            print(d)
             self._settings[school_year] = d.get('data')[0]
         except IndexError:
             raise ZermeloApiDataException('No response data in settings request.')

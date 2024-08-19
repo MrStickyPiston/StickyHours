@@ -1,9 +1,11 @@
 from datetime import datetime
 
+import pytz
+
 from commonfreehours.zapi import Zermelo
 
 
-def process_appointments(appointments):
+def process_appointments(appointments) -> dict:
     # Preprocesses the appointments for getting the gaps
     days = {}
     gaps = {}
@@ -21,10 +23,14 @@ def process_appointments(appointments):
         s = a["startTimeSlot"]
         e = a["endTimeSlot"]
 
-        st = datetime.fromtimestamp(a.get('start'))
-        et = datetime.fromtimestamp(a.get('end'))
+        st = datetime.fromtimestamp(a.get('start'), tz=pytz.timezone('Europe/Amsterdam'))
+        et = datetime.fromtimestamp(a.get('end'), tz=pytz.timezone('Europe/Amsterdam'))
 
-        d = str(datetime.fromtimestamp(a.get('start')).date())
+        d = str(datetime.fromtimestamp(a.get('start'), tz=pytz.timezone('Europe/Amsterdam')).date())
+
+        if s is None or e is None:
+            print(f"Appointment without start or end timeslot: {a}")
+            continue
 
         if days.get(d) is None:
             days[d] = []
@@ -38,18 +44,33 @@ def process_appointments(appointments):
         previous_slot = [s, e]
         previous_time = [st, et]
 
+
+
         days[d].append([s, e])
     return gaps
 
-def get_common_gaps(*gaps):
+def get_common_gaps(*gaps) ->  dict[list] | dict:
     # Returns common gaps between gap lists in a days dict
 
     # Return the first element of gaps when only one or less is supplied
-    # Throws an indexerror if no args are supplied
-    if len(gaps) <= 1:
-        return gaps[0]
 
     common_gaps = {}
+
+    if len(gaps) == 0:
+        return common_gaps
+
+    elif len(gaps) == 1:
+
+        for date in gaps[0].keys():
+            for gap in gaps[0].get(date):
+                if common_gaps.get(date) is None:
+                    common_gaps[date] = []
+
+                common_gaps.get(date).append(gap)
+
+        return common_gaps
+
+
 
     # Convert tuple to list for popping
     gaps = list(gaps)

@@ -28,6 +28,10 @@ def process_appointments(appointments) -> dict:
 
         d = str(datetime.fromtimestamp(a.get('start'), tz=pytz.timezone('Europe/Amsterdam')).date())
 
+        if s is None or e is None:
+            print(f"Appointment without start or end timeslot: {a}")
+            continue
+
         if days.get(d) is None:
             days[d] = []
 
@@ -40,6 +44,8 @@ def process_appointments(appointments) -> dict:
         previous_slot = [s, e]
         previous_time = [st, et]
 
+
+
         days[d].append([s, e])
     return gaps
 
@@ -47,12 +53,24 @@ def get_common_gaps(*gaps) ->  dict[list] | dict:
     # Returns common gaps between gap lists in a days dict
 
     # Return the first element of gaps when only one or less is supplied
-    if len(gaps) == 0:
-        return {}
-    elif len(gaps) == 1:
-        return gaps[0]
 
     common_gaps = {}
+
+    if len(gaps) == 0:
+        return common_gaps
+
+    elif len(gaps) == 1:
+
+        for date in gaps[0].keys():
+            for gap in gaps[0].get(date):
+                if common_gaps.get(date) is None:
+                    common_gaps[date] = []
+
+                common_gaps.get(date).append(gap)
+
+        return common_gaps
+
+
 
     # Convert tuple to list for popping
     gaps = list(gaps)

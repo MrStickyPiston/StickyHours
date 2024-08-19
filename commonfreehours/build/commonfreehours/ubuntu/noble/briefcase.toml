@@ -1,0 +1,12 @@
+# Generated using Briefcase 0.3.19 for ubuntu:noble, Python 3.12
+[paths]
+app_path = "commonfreehours-0.0.1/usr/lib/commonfreehours/app"
+app_packages_path = "commonfreehours-0.0.1/usr/lib/commonfreehours/app_packages"
+
+icon.16 = "commonfreehours-0.0.1/usr/share/icons/hicolor/16x16/apps/dev.mrstickypiston.commonfreehours.png"
+icon.32 = "commonfreehours-0.0.1/usr/share/icons/hicolor/32x32/apps/dev.mrstickypiston.commonfreehours.png"
+icon.64 = "commonfreehours-0.0.1/usr/share/icons/hicolor/64x64/apps/dev.mrstickypiston.commonfreehours.png"
+icon.128 = "commonfreehours-0.0.1/usr/share/icons/hicolor/128x128/apps/dev.mrstickypiston.commonfreehours.png"
+icon.256 = "commonfreehours-0.0.1/usr/share/icons/hicolor/256x256/apps/dev.mrstickypiston.commonfreehours.png"
+icon.512 = "commonfreehours-0.0.1/usr/share/icons/hicolor/512x512/apps/dev.mrstickypiston.commonfreehours.png"
+# icon.scalable = "commonfreehours-0.0.1/usr/share/icons/hicolor/scalable/apps/dev.mrstickypiston.commonfreehours.png"
