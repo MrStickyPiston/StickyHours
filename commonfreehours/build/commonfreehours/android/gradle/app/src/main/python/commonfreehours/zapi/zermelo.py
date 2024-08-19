@@ -4,6 +4,7 @@ import re
 from datetime import datetime, timedelta
 from urllib.parse import urlparse, parse_qs
 
+import pytz
 import requests
 
 from commonfreehours.zapi.exceptions import *
@@ -107,7 +108,7 @@ class Zermelo:
             raise ZermeloAuthException('Not logged in')
 
         self.require_setting(f"{'student' if self.get_user().get('isStudent') else 'employee'}CanViewProjectSchedules",
-                             True, 'appointments', get_school_year(datetime.utcfromtimestamp(start)))
+                             True, 'appointments', get_school_year(datetime.fromtimestamp(start, tz=pytz.timezone('Europe/Amsterdam'))))
 
         params = {
             'start': int(start),

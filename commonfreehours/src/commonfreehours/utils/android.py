@@ -1,5 +1,6 @@
 import java
 
+platform = 'ANDROID'
 
 def open_url(url):
     Intent = java.jclass("android.content.Intent")

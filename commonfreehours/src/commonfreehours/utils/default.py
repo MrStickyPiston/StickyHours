@@ -4,6 +4,8 @@ import webbrowser
 
 from toga.style import Pack
 
+platform = 'OTHER'
+
 locale.setlocale(locale.LC_ALL, '')
 
 button_style = Pack()

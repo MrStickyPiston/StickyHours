@@ -7,7 +7,7 @@ from commonfreehours import utils
 
 
 class AccountEntry:
-    def __init__(self, controller, options_func, value=None):
+    def __init__(self, controller, options_func, add_button_translation, filter_placeholder_translation, value=None):
         self.controller = controller
         self.options_func = options_func
 
@@ -16,12 +16,12 @@ class AccountEntry:
 
 
         # Text input to filter selector
-        self.filter_input = toga.TextInput(on_change=self.filter_selector, placeholder="Filter...", style=Pack(flex=1))
+        self.filter_input = toga.TextInput(on_change=self.filter_selector, placeholder=filter_placeholder_translation, style=Pack(flex=1))
         if value:
             self.filter_input.value = value
 
         # Remove button
-        self.remove_button = toga.Button('Remove', on_press=self.remove_entry, style=utils.button_style)
+        self.remove_button = toga.Button(add_button_translation, on_press=self.remove_entry, style=utils.button_style)
 
         # Entry row box
         self.box = toga.Box(
