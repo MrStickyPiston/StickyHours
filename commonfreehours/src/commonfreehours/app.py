@@ -35,7 +35,7 @@ class FontSize(Enum):
 lang = Lang()
 _ = lang.translate
 
-@freezegun.freeze_time("2024-6-12")
+#@freezegun.freeze_time("2024-6-12")
 class CommonFreeHours(toga.App):
 
     # For except hook
@@ -115,7 +115,7 @@ class CommonFreeHours(toga.App):
         except ZermeloApiDataException:
             self.main_window.error_dialog(_('error.data.title'), _('error.data.message'))
         except ZermeloFunctionSettingsError:
-            self.main_window.error_dialog(_('error.function_settings.title'), _('error.function_settings.message'))
+            self.main_window.error_dialog(_('error.function_settings.title'), _('error.function_settings.message').format(exception.setting, exception.value, exception.required_value, exception.endpoint))
             self.logout_zermelo()
             self.login_view()
         except ZermeloApiHttpStatusException:
