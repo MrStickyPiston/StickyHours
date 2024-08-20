@@ -52,6 +52,8 @@
       <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/build/Debug-iphonesimulator/Sticky Hours.app/app_packages/toga_iOS-0.4.5.dist-info" />
       <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/build/Debug-iphonesimulator/Sticky Hours.app/app_packages/travertino-0.3.0.dist-info" />
       <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/build/Debug-iphonesimulator/Sticky Hours.app/app_packages/urllib3-2.2.2.dist-info" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ios/xcode/StickyHours/app" />
+      <excludeFolder url="file://$MODULE_DIR$/commonfreehours/build/commonfreehours/ubuntu/noble/commonfreehours-0.0.1/usr/lib" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.12 (CommonFreeHours-app)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

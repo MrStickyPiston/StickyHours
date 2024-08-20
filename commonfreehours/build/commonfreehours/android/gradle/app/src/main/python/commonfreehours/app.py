@@ -2,10 +2,7 @@
 Easily check for common free hours in zermelo.
 """
 import asyncio
-import datetime
 import logging
-import pathlib
-import sys
 import traceback
 from enum import Enum
 from typing import List, Self
@@ -94,38 +91,53 @@ class CommonFreeHours(toga.App):
                     f"Logged in with existing token with account {self.user_config.get('account_name')} on {self.user_config.get('school')}")
                 self.main()
 
+            except ZermeloAuthException:
+                logging.info("Auth error, token invalid")
+                self.login_view()
+
             except Exception as e:
                 logging.info("Logging in failed")
                 logging.debug(f"Logging in error: {e}")
-                self.handle_exception(e)
-                self.login_view()
+                self.handle_exception(e, show_error_view=True)
 
         self.main_window.show()
 
-    def handle_exception(self, exception: Exception):
+    def handle_exception(self, exception: Exception, show_error_view: bool = False):
         logging.error(f"Handling exception: {exception}")
+
+        show_traceback = False
+
         try:
             raise exception
         except ZermeloApiNetworkError:
             self.main_window.error_dialog(_('error.network.title'), _('error.network.message'))
+            message = _('error.network.message')
         except ZermeloAuthException:
             self.main_window.error_dialog(_('error.auth.title'), _('error.auth.message'))
             self.logout_zermelo()
             self.login_view()
         except ZermeloApiDataException:
             self.main_window.error_dialog(_('error.data.title'), _('error.data.message'))
+            message = _('error.data.message')
         except ZermeloFunctionSettingsError:
-            self.main_window.error_dialog(_('error.function_settings.title'), _('error.function_settings.message'))
-            self.logout_zermelo()
-            self.login_view()
+            self.main_window.error_dialog(_('error.function_settings.title'), _('error.function_settings.message').format(exception.setting, exception.value, exception.required_value, exception.endpoint))
+            message = _('error.function_settings.message')
         except ZermeloApiHttpStatusException:
             self.main_window.error_dialog(_('error.http_status.title'), _('error.http_status.message'))
+            message = _('error.http_status.message')
+            show_traceback = True
         except:
             # android has no stacktrace dialog
             if utils.platform == "ANDROID":
                 self.main_window.error_dialog(_('error.other.title'), _('error.other.message') + "\n\n" + traceback.format_exc())
             else:
                 self.main_window.stack_trace_dialog(_('error.other.title'), _('error.other.message'), traceback.format_exc())
+
+            message = _('error.other.message')
+            show_traceback = True
+        finally:
+            if show_error_view:
+                self.error_view(message, show_traceback)
 
 
     def get_account_options(self):
@@ -270,6 +282,19 @@ class CommonFreeHours(toga.App):
 
         self.main_window.content = self.login_box
 
+    def error_view(self, message, show_traceback):
+        self.main_window.title = f"{_('error.window.title')} - {self.formal_name}"
+
+        self.logout_command.enabled = False
+
+        error_box = toga.Box(style=Pack(flex=1, direction=COLUMN))
+
+        error_box.add(toga.MultilineTextInput(value=message, readonly=True, style=Pack(flex=1)))
+        if show_traceback:
+            error_box.add(toga.MultilineTextInput(readonly=True, value=traceback.format_exc()))
+
+        self.main_window.content = error_box
+
     async def login_help(self, widget):
         utils.open_url(self.app.home_page.rstrip('/') + '/' + 'login-help')
         pass
@@ -366,12 +391,12 @@ class CommonFreeHours(toga.App):
 
                 a = self.zermelo.get_current_weeks_appointments(user=v.id, is_teacher=v.teacher, weeks=int(self.weeks_amount_input.value), valid_only=True)
                 if not a:
-                    self.main_window.error_dialog(_('main.message.no_schedule.title'), _('main.message.no_schedule.message'))
+                    # no schedule found
                     break
                 logging.info(f"Preprocessing {v.id}")
                 g = process_appointments(a)
                 if not g:
-                    self.main_window.error_dialog(_('main.message.no_gaps.title'), _('main.message.no_gaps.message'))
+                    # no gaps are found for this user
                     break
                 gaps.append(g)
 
@@ -393,7 +418,7 @@ class CommonFreeHours(toga.App):
         # Keep requests down to a minimum by removing duplicates.
         for entry in self.entries:
             if entry.get_value() is None:
-                # TODO: notify user
+                await self.main_window.error_dialog(_('main.message.no_schedule_user.title'), _('main.message.no_schedule_user.message'))
                 done()
                 return
             elif entry.get_value().id not in ids:
@@ -403,7 +428,6 @@ class CommonFreeHours(toga.App):
         try:
             await loop.run_in_executor(None, sync)
         except Exception as e:
-            # TODO: implement ZermeloApiNetworkError
             done()
             await self.main_window.error_dialog(_('main.message.failed.title'), _('main.message.failed.error') + "\n\n" + str(traceback.format_exc()))
             raise e

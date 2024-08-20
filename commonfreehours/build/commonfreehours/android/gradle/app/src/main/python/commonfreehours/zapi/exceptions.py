@@ -10,6 +10,7 @@ class ZermeloFunctionSettingsError(ZermeloException):
         self.setting = setting
         self.value = value
         self.required_value = required_value
+        self.endpoint = endpoint
 
 
 class ZermeloValueError(ZermeloException):
