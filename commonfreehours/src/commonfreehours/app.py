@@ -22,6 +22,8 @@ from .zapi import *
 import commonfreehours.utils as utils
 from .zapi.zermelo import get_school_year
 
+from babel.dates import format_date
+
 
 class FontSize(Enum):
     s = 14
@@ -285,13 +287,16 @@ class CommonFreeHours(toga.App):
     def error_view(self, message, show_traceback):
         self.main_window.title = f"{_('error.window.title')} - {self.formal_name}"
 
-        self.logout_command.enabled = False
+        self.logout_command.enabled = True
 
         error_box = toga.Box(style=Pack(flex=1, direction=COLUMN))
 
-        error_box.add(toga.MultilineTextInput(value=message, readonly=True, style=Pack(flex=1)))
+        error_text = toga.MultilineTextInput(value=message, readonly=True, style=Pack(flex=1, font_size=FontSize.s.value, padding=10))
+
         if show_traceback:
-            error_box.add(toga.MultilineTextInput(readonly=True, value=traceback.format_exc()))
+            error_text.value += "\n\n" + _('error.window.error_below') + "\n\n" + traceback.format_exc()
+
+        error_box.add(error_text)
 
         self.main_window.content = error_box
 
@@ -429,8 +434,8 @@ class CommonFreeHours(toga.App):
             await loop.run_in_executor(None, sync)
         except Exception as e:
             done()
-            await self.main_window.error_dialog(_('main.message.failed.title'), _('main.message.failed.error') + "\n\n" + str(traceback.format_exc()))
-            raise e
+            self.handle_exception(e)
+            return
 
         self.compute_button.text = _('main.button.listing')
 
@@ -449,7 +454,7 @@ class CommonFreeHours(toga.App):
             if not self.common_gaps_cache.get(day):
                 continue
 
-            self.result_box.add(toga.Label(self.common_gaps_cache.get(day)[0][1][0].strftime('\n%A %d %B %Y'),
+            self.result_box.add(toga.Label("\n" + format_date(self.common_gaps_cache.get(day)[0][1][0], format='full', locale=lang.lang),
                                            style=Pack(font_size=FontSize.l.value)))
             for gap in self.common_gaps_cache.get(day):
                 self.result_box.add(toga.Label(

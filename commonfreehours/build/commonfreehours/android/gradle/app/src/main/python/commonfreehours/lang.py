@@ -42,18 +42,30 @@ class Lang:
                                  'command.logout.confirm.title': 'Confirm logging out',
                                  'command.logout.success.message': 'Successfully logged out.',
                                  'command.logout.success.title': 'Logged out',
-                                 'error.auth.message': "Your zermelo session has been expired. Please log in again.",
-                                 'error.auth.title': "Session expired",
-                                 'error.data.message': "The zermelo api returned incorrect or faulty data. Please report this on the issue tracker.",
-                                 'error.data.title': "Error: invalid data",
-                                 'error.function_settings.message': "Your school set school function setting {} to {} but it is required to be {} for endpoint {}.",
-                                 'error.function_settings.title': "Error: invalid settings",
-                                 'error.http_status.message': "The zermelo api returned an error. Please try again.",
-                                 'error.http_status.title': "Zermelo api error",
-                                 'error.network.message': "You are not connected to the internet or the zermelo servers are down. Please try again",
-                                 'error.network.title': "Error: no connection",
-                                 'error.other.message': "Something went wrong. Please report the error below to the issue tracker.",
-                                 'error.other.title': "Unexpected error",
+                                 'error.auth.message': 'Your zermelo session has been expired. Please '
+                                                       'log in again.',
+                                 'error.auth.title': 'Session expired',
+                                 'error.data.message': 'The zermelo api returned incorrect or faulty '
+                                                       'data. Please report this on the issue tracker.',
+                                 'error.data.title': 'Error: invalid data',
+                                 'error.function_settings.message': 'Your school set school function '
+                                                                    'setting {} to {} but it is '
+                                                                    'required to be {} for endpoint {}.',
+                                 'error.function_settings.title': 'Error: invalid settings',
+                                 'error.http_status.message': 'The zermelo api returned an error. '
+                                                              'Please try again. If this error stays, '
+                                                              'please log out and in again. Else report '
+                                                              'this error on the issue tracker.',
+                                 'error.http_status.title': 'Zermelo api error',
+                                 'error.network.message': 'You are not connected to the internet or the '
+                                                          'zermelo servers are down. Please try again '
+                                                          'later.',
+                                 'error.network.title': 'Error: no connection',
+                                 'error.other.message': 'Something went wrong. Please report the error '
+                                                        'below to the issue tracker.',
+                                 'error.other.title': 'Unexpected error',
+                                 'error.window.error_below': 'See the error below:',
+                                 'error.window.title': 'Errors',
                                  'main.button.add_entry': 'Add user',
                                  'main.button.idle': 'Compute',
                                  'main.button.listing': 'Listing data...',
@@ -61,11 +73,9 @@ class Lang:
                                  'main.button.remove_entry': 'Remove user',
                                  'main.label.entries': 'Users',
                                  'main.label.weeks_amount': 'Amount of weeks',
-                                 'main.message.failed.error': 'An error occured. Please report the '
-                                                              'error below to the issue tracker:',
-                                 'main.message.failed.title': 'Computing common free hours failed',
-                                 'main.message.no_schedule_user.message': 'User {} has no schedule available.',
-                                 'main.message.no_schedule_user.title': "No schedule found for user.",
+                                 'main.message.no_schedule_user.message': 'User {} has no schedule '
+                                                                          'available.',
+                                 'main.message.no_schedule_user.title': 'No schedule found for user.',
                                  'main.placeholder.filter_entry': 'Filter users...',
                                  'main.results.header': 'Common free hours',
                                  'main.results.none': 'No common free hours found.'},
@@ -89,16 +99,29 @@ class Lang:
                                  'command.logout.success.title': 'Account afgemeld',
                                  'error.auth.message': 'Uw sessie is verlopen. Log opnieuw in.',
                                  'error.auth.title': 'Sessie verlopen',
-                                 'error.data.message': 'De Zermelo api stuurde verkeerde data terug. Rapporteer dit op de issue tracker.',
+                                 'error.data.message': 'De Zermelo api stuurde verkeerde data terug. '
+                                                       'Rapporteer dit op de issue tracker.',
                                  'error.data.title': 'Fout: verkeerde data',
-                                 'error.function_settings.message': "De school heeft de school function setting {} ingesteld als {} maar moet {} zijn zodat api endpoint {} goed werkt.",
+                                 'error.function_settings.message': 'De school heeft de school function '
+                                                                    'setting {} ingesteld als {} maar '
+                                                                    'moet {} zijn zodat api endpoint {} '
+                                                                    'goed werkt.',
                                  'error.function_settings.title': 'Error: verkeerde instelling',
-                                 'error.http_status.message': 'De Zermelo api stuurde een fout terug. Probeer het later nog eens.',
+                                 'error.http_status.message': 'De Zermelo api stuurde een fout terug. '
+                                                              'Probeer het later nog eens. Probeer in '
+                                                              'en uit te loggen. Als dat ook niet '
+                                                              'helpt, rapporteer dit dan op de '
+                                                              'issuetracker.',
                                  'error.http_status.title': 'Zermelo api fout',
-                                 'error.network.message': 'Geen verbinding met de servers van zermelo. Controleer de verbinding met het internet en probeer het nog eens.',
+                                 'error.network.message': 'Geen verbinding met de servers van zermelo. '
+                                                          'Controleer de verbinding met het internet en '
+                                                          'probeer het nog eens.',
                                  'error.network.title': 'Geen verbinding',
-                                 'error.other.message': 'Er is iets misgegaan. Rapporteer deze fout op de issuetracker.',
+                                 'error.other.message': 'Er is iets misgegaan. Rapporteer deze fout op '
+                                                        'de issuetracker.',
                                  'error.other.title': 'Onverwachte fout',
+                                 'error.window.error_below': 'Zie de fout hieronder:',
+                                 'error.window.title': 'Fouten',
                                  'main.button.add_entry': 'Gebruiker toevoegen',
                                  'main.button.idle': 'Vind gezamelijke tussenuren',
                                  'main.button.listing': 'Gegevens weergeven...',
@@ -106,11 +129,8 @@ class Lang:
                                  'main.button.remove_entry': 'Gebruiker verwijderen',
                                  'main.label.entries': 'Gebruikers',
                                  'main.label.weeks_amount': 'Aantal weken',
-                                 'main.message.failed.error': 'Er is iets fout gegaan. Rapporteer de '
-                                                              'onderstaande fout op de issuetracker:',
-                                 'main.message.failed.title': 'Probleem tijdens het vinden van '
-                                                              'gemeenschappelijke uren',
-                                 'main.message.no_schedule_user.message': 'Geen rooster gevonden voor gebruiker {}.',
+                                 'main.message.no_schedule_user.message': 'Geen rooster gevonden voor '
+                                                                          'gebruiker {}.',
                                  'main.message.no_schedule_user.title': 'Geen rooster gevonden',
                                  'main.placeholder.filter_entry': 'Gebruikers filteren...',
                                  'main.results.header': 'Gezamelijke tussenuren',
