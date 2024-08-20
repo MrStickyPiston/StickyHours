@@ -64,7 +64,7 @@ class Lang:
                                  'main.message.failed.error': 'An error occured. Please report the '
                                                               'error below to the issue tracker:',
                                  'main.message.failed.title': 'Computing common free hours failed',
-                                 'main.message.no_schedule_user.message: 'User {} has no schedule available.',
+                                 'main.message.no_schedule_user.message': 'User {} has no schedule available.',
                                  'main.message.no_schedule_user.title': "No schedule found for user.",
                                  'main.placeholder.filter_entry': 'Filter users...',
                                  'main.results.header': 'Common free hours',
