@@ -91,6 +91,7 @@ class CommonFreeHours(toga.App):
                 self.zermelo.token_login(self.user_config.get('token'), self.user_config.get('instance_id'))
                 logging.info(
                     f"Logged in with existing token with account {self.user_config.get('account_name')} on {self.user_config.get('school')}")
+                self.get_account_options()
                 self.main()
 
             except ZermeloAuthException:
@@ -123,7 +124,7 @@ class CommonFreeHours(toga.App):
             message = _('error.data.message')
         except ZermeloFunctionSettingsError:
             self.main_window.error_dialog(_('error.function_settings.title'), _('error.function_settings.message').format(exception.setting, exception.value, exception.required_value, exception.endpoint))
-            message = _('error.function_settings.message')
+            message = _('error.function_settings.message').format(exception.setting, exception.value, exception.required_value, exception.endpoint)
         except ZermeloApiHttpStatusException:
             self.main_window.error_dialog(_('error.http_status.title'), _('error.http_status.message'))
             message = _('error.http_status.message')
@@ -152,7 +153,7 @@ class CommonFreeHours(toga.App):
         except ZermeloAuthException:
             return []
         except Exception as e:
-            self.handle_exception(e)
+            raise e
 
     def add_entry(self, widget=None, value=None):
         new_entry = AccountEntry(controller=self,
@@ -207,11 +208,6 @@ class CommonFreeHours(toga.App):
         self.main_window.title = self.formal_name
 
         self.logout_command.enabled = True
-
-        try:
-            self.accounts = get_accounts(self.zermelo, get_school_year())
-        except Exception as e:
-            self.handle_exception(e)
 
         if not self.entries:
             self.add_entry(value=self.zermelo.get_user().get('code'))
@@ -314,6 +310,7 @@ class CommonFreeHours(toga.App):
                 self.zermelo_user_input.value.strip(),
                 self.zermelo_password.value
             )
+            self.get_account_options()
 
         def done():
             self.login_button.enabled = True
@@ -349,6 +346,7 @@ class CommonFreeHours(toga.App):
         except Exception as e:
             done()
             self.handle_exception(e)
+            self.zermelo.logout()
             return
 
         logging.info("Logged in successfully")
@@ -375,6 +373,7 @@ class CommonFreeHours(toga.App):
             logging.info("Cancelled logging out")
 
     def logout_zermelo(self):
+        self.accounts = []
         self.zermelo.logout()
         self.user_config['token'] = ''
         self.login_view()

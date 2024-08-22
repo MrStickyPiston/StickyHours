@@ -104,6 +104,9 @@ class Zermelo:
 
     def get_appointments(self, start: int, end: int, user: str, is_teacher: bool = False, valid_only: bool = True):
         # Gets the raw schedule from the api
+
+        self.logger.info("method get_appointments called")
+
         if not self.logged_in:
             raise ZermeloAuthException('Not logged in')
 
@@ -136,7 +139,12 @@ class Zermelo:
 
     def get_current_weeks_appointments(self, user: str, is_teacher: bool = False, weeks: int = 1,
                                        valid_only: bool = False, fix_403: bool = True,
-                                       max_weeks_optimization: bool = True):
+                                       max_weeks_optimization: bool = True, max_weeks_optimization_original_weeks: int = None):
+        self.logger.info("method get_current_weeks_appointments called")
+
+        if max_weeks_optimization_original_weeks is None:
+            max_weeks_optimization_original_weeks = weeks
+
         # The appointments of the current week
         if not self.logged_in:
             raise ZermeloAuthException('Not logged in')
@@ -150,7 +158,9 @@ class Zermelo:
 
         try:
             appointments = self.get_appointments(start.timestamp(), end.timestamp(), user, is_teacher, valid_only)
-            self.max_appointment_weeks = weeks
+
+            if weeks != max_weeks_optimization_original_weeks:
+                self.max_appointment_weeks = weeks
 
             return appointments
         except ZermeloApiDataException as e:
@@ -163,11 +173,12 @@ class Zermelo:
                     weeks -= 1
 
                 return self.get_current_weeks_appointments(user, is_teacher, weeks, valid_only, True,
-                                                           max_weeks_optimization)
+                                                           max_weeks_optimization, max_weeks_optimization_original_weeks)
             else:
                 raise e
 
     def get_students(self, school_year: int = None, fields: str = None):
+        self.logger.info("method get_students called")
         if not self.logged_in:
             raise ZermeloAuthException('Not logged in')
 
