@@ -190,10 +190,11 @@ class Zermelo:
 
         params = {
             "schoolInSchoolYear": self.get_settings(school_year).get('schoolInSchoolYear'),
+            "isStudent": "true",
             "fields": fields
         }
         try:
-            d = self.send_request('GET', 'studentsindepartments', params=params)
+            d = self.send_request('GET', 'users', params=params)
         except ZermeloApiHttpStatusException as e:
             # Not allowed to search for value, possibly due to summer holidays?
             if e.status == 403:
@@ -214,10 +215,11 @@ class Zermelo:
 
         params = {
             "schoolInSchoolYear": self.get_settings(school_year).get('schoolInSchoolYear'),
+            "isEmployee": "true",
             "fields": fields
         }
         try:
-            d = self.send_request('GET', 'contracts', params=params)
+            d = self.send_request('GET', 'users', params=params)
         except ZermeloApiHttpStatusException as e:
             # Not allowed to search for value, possibly due to summer holidays?
             if e.status == 403:

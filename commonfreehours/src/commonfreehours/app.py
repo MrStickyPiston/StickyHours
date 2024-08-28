@@ -82,7 +82,6 @@ class CommonFreeHours(toga.App):
 
         if (
             self.user_config.get('instance_id', '') == '' or
-            self.user_config.get('account_name', '') == '' or
             self.user_config.get('token', '') == ''):
             logging.info(f"Empty value in user in config, logging in again.")
             self.login_view()
@@ -90,7 +89,7 @@ class CommonFreeHours(toga.App):
             try:
                 self.zermelo.token_login(self.user_config.get('token'), self.user_config.get('instance_id'))
                 logging.info(
-                    f"Logged in with existing token with account {self.user_config.get('account_name')} on {self.user_config.get('school')}")
+                    f"Logged in with existing token with account on {self.user_config.get('school')}")
                 self.get_account_options()
                 self.main()
 
@@ -233,30 +232,17 @@ class CommonFreeHours(toga.App):
 
         zermelo_box.add(school_box)
 
-        # Zermelo user
-        self.zermelo_user_input = toga.TextInput()
-
-        user_info_box = toga.Box(style=Pack(direction=COLUMN))
-        user_info_box.add(
-            toga.Label(_('auth.user'), style=Pack(font_size=FontSize.l.value)))
-
-        user_box = toga.Box(style=Pack(direction=COLUMN))
-        user_box.add(user_info_box)
-        user_box.add(self.zermelo_user_input)
-
-        zermelo_box.add(user_box)
-
         # Zermelo password
-        self.zermelo_password = toga.PasswordInput()
-        password_info_box = toga.Box(style=Pack(direction=COLUMN))
-        password_info_box.add(
-            toga.Label(_('auth.password'), style=Pack(font_size=FontSize.l.value)))
+        self.zermelo_linkcode = toga.PasswordInput()
+        linkcode_info_box = toga.Box(style=Pack(direction=COLUMN))
+        linkcode_info_box.add(
+            toga.Label(_('auth.linkcode'), style=Pack(font_size=FontSize.l.value)))
 
-        password_box = toga.Box(style=Pack(direction=COLUMN))
-        password_box.add(password_info_box)
-        password_box.add(self.zermelo_password)
+        linkcode_box = toga.Box(style=Pack(direction=COLUMN))
+        linkcode_box.add(linkcode_info_box)
+        linkcode_box.add(self.zermelo_linkcode)
 
-        zermelo_box.add(password_box)
+        zermelo_box.add(linkcode_box)
 
         self.login_button = toga.Button(_('auth.button.idle'), on_press=self.login_scheduler, style=utils.button_style)
         self.login_help_button = toga.Button(_('auth.button.help'), on_press=self.login_help, style=utils.button_style)
@@ -274,7 +260,6 @@ class CommonFreeHours(toga.App):
 
         try:
             self.zermelo_school_input.value = self.user_config.get('school')
-            self.zermelo_user_input.value = self.user_config.get('account_name')
         except Exception as e:
             self.handle_exception(e)
 
@@ -305,10 +290,9 @@ class CommonFreeHours(toga.App):
 
     async def login_task(self):
         def login():
-            self.zermelo.password_login(
-                self.zermelo_school_input.value.strip(),
-                self.zermelo_user_input.value.strip(),
-                self.zermelo_password.value
+            self.zermelo.code_login(
+                self.zermelo_linkcode.value,
+                self.zermelo_school_input.value,
             )
             self.get_account_options()
 
@@ -319,7 +303,7 @@ class CommonFreeHours(toga.App):
         await asyncio.sleep(0)  # Yield to event loop briefly
         loop = asyncio.get_event_loop()
 
-        if self.zermelo_school_input.value == '' or self.zermelo_user_input.value == '' or self.zermelo_password.value == '':
+        if self.zermelo_school_input.value == '' or self.zermelo_linkcode.value == '':
             await self.main_window.error_dialog(_('auth.message.failed.title'), _('auth.message.failed.fields'))
             return
 
@@ -327,7 +311,7 @@ class CommonFreeHours(toga.App):
         self.login_button.text = _('auth.button.progress')
 
         logging.info(
-            f"Logging in as {self.zermelo_user_input.value} on {self.zermelo_school_input.value}")
+            f"Logging in on {self.zermelo_school_input.value}")
 
         try:
             await loop.run_in_executor(None, login)
@@ -351,7 +335,6 @@ class CommonFreeHours(toga.App):
 
         logging.info("Logged in successfully")
 
-        self.user_config['account_name'] = self.zermelo_user_input.value.strip()
         self.user_config['instance_id'] = self.zermelo_school_input.value.strip()
         self.user_config['token'] = self.zermelo.get_token()
 
