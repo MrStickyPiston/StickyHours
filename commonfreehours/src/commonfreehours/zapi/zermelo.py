@@ -435,6 +435,11 @@ class Zermelo:
             if r.status_code == 404:
                 self.logger.error(f"Instance {instance_id} does not exist.")
                 raise ZermeloValueError(f"Incorrect instance id: {instance_id}")
+            elif r.status_code == 400:
+                # Workaround zermelo bug returning Body: b'{"response":{"status":400,"message":"The request was syntactically incorrect. Did you provide valid JSON?"}}'
+                # when the linkcode is expired
+                raise  ZermeloAuthException("Invalid linkcode")
+            raise ZermeloApiHttpStatusException(r.status_code, r.content)
 
         self.logger.debug(f"Request POST /oath/token: {r}")
 

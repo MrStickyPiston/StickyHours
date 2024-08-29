@@ -27,7 +27,7 @@ class Lang:
         self.languages = {'en': {'auth.button.help': 'Help',
                                  'auth.button.idle': 'Log in',
                                  'auth.button.progress': 'Logging in...',
-                                 'auth.message.failed.credentials': 'Invalid account name or password.',
+                                 'auth.message.failed.credentials': 'Invalid or expired linkcode. Press the "Help" button for more information.',
                                  'auth.message.failed.fields': 'Some fields are empty. Please fill in '
                                                                'all fields.',
                                  'auth.message.failed.instance_id': 'Incorrect zermelo instance id.',
@@ -81,8 +81,7 @@ class Lang:
                           'nl': {'auth.button.help': 'Hulp met inloggen',
                                  'auth.button.idle': 'Log in',
                                  'auth.button.progress': 'Aan het inloggen...',
-                                 'auth.message.failed.credentials': 'Verkeerd wachtwoord of '
-                                                                    'gebruikersnaam.',
+                                 'auth.message.failed.credentials': 'Verkeerde of verlopen linkcode. Druk op de hulpknop voor meer informatie over linkcodes.',
                                  'auth.message.failed.fields': 'Vul alle velden in',
                                  'auth.message.failed.instance_id': 'Incorrecte zermelo portal id',
                                  'auth.message.failed.title': 'Probleem bij inloggen',

@@ -104,18 +104,18 @@ def get_common_gaps(*gaps) ->  dict[list] | dict:
     return common_gaps
 
 def get_accounts(zermelo: Zermelo, school_year: int):
-    students = zermelo.get_students(school_year, "firstName,prefix,lastName,student")
-    teachers = zermelo.get_teachers(school_year, "employee,prefix,lastName")
+    students = zermelo.get_students(school_year)
+    teachers = zermelo.get_teachers(school_year)
 
     accounts = []
 
     for teacher in teachers:
         name = f"{teacher['prefix']} {teacher['lastName']}" if teacher['prefix'] else f"{teacher['lastName']}"
-        accounts.append({"name": f"{name} ({teacher['employee']})", "id": teacher['employee'], 'teacher': True})
+        accounts.append({"name": f"{name} ({teacher['code']})", "id": teacher['code'], 'teacher': True})
 
     # Process the student list
     for student in students:
         name = f"{student['firstName']} {student['prefix']} {student['lastName']}" if student['prefix'] else f"{student['firstName']} {student['lastName']}"
-        accounts.append({"name": f"{name} ({student['student']})", "id": student['student'], 'teacher': False})
+        accounts.append({"name": f"{name} ({student['code']})", "id": student['code'], 'teacher': False})
 
     return accounts
