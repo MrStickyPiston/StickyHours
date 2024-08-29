@@ -178,6 +178,7 @@ class Zermelo:
                 raise e
 
     def get_students(self, school_year: int = None, fields: str = None):
+        # gets the students. requires setting *CanViewProjectSchedules to work and studentCanViewProjectNames to view names as student
         self.logger.info("method get_students called")
         if not self.logged_in:
             raise ZermeloAuthException('Not logged in')
