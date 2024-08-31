@@ -162,6 +162,9 @@ class Lang:
 
         return value
 
+lang = Lang()
+_ = lang.translate
+
 if __name__ == "__main__":
     translations = {}
 

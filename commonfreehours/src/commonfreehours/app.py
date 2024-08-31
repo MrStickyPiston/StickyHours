@@ -14,9 +14,9 @@ import configparser
 from toga.style import Pack
 from toga.style.pack import COLUMN, ROW
 import toga.platform
-from commonfreehours.lang import Lang
 from .commonFreeHours import get_accounts, process_appointments, get_common_gaps
 from .accountentry import AccountEntry
+from .lang import _
 
 from .zapi import *
 import commonfreehours.utils as utils
@@ -30,9 +30,6 @@ class FontSize(Enum):
     l = 16
     xl = 19
     xxl = 22
-
-lang = Lang()
-_ = lang.translate
 
 @freezegun.freeze_time("2024-6-12")
 class CommonFreeHours(toga.App):
@@ -102,6 +99,9 @@ class CommonFreeHours(toga.App):
                 logging.debug(f"Logging in error: {e}")
                 self.handle_exception(e, show_error_view=True)
 
+        self.view_login_setup()
+        self.view_login_activate()
+
         self.main_window.show()
 
     def handle_exception(self, exception: Exception, show_error_view: bool = False):
@@ -141,9 +141,29 @@ class CommonFreeHours(toga.App):
             if show_error_view:
                 self.error_view(message, show_traceback)
 
+    def view_login_setup(self):
+        self.view_login_institution = toga.Box(style=Pack(direction=COLUMN))
+
+        # School input and help button
+        wrapper_input_school = toga.Box()
+
+        self.input_school = toga.TextInput(style=Pack(flex=1, height=48))
+
+        wrapper_input_school.add(self.input_school)
+        wrapper_input_school.add(toga.Box(children=[toga.Button(text='ⓘ', style=Pack(flex=1, width=48, height=48))]))
+
+        self.view_login_institution.add(wrapper_input_school)
+
+        self.view_login_institution.add(toga.Button(text="Next"))
+
+        self.view_login_linkcode = toga.Box()
+
+    def view_login_activate(self):
+        self.main_window.content = self.view_login_institution
+
+        self.main_window.title = f"{_('auth.window.title')} - {self.formal_name}"
 
     def get_account_options(self):
-        #TODO: replace school year
         if self.accounts:
             return self.accounts
         try:
