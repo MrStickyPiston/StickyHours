@@ -17,6 +17,8 @@ env:
 defaults:
   run:
     shell: bash
+    # Because different working directory
+    working-directory: commonfreehours
 
 jobs:
   ci:
