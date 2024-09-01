@@ -35,6 +35,13 @@ jobs:
             output-format: "app"
             runs-on: "macos-latest"
 
+          - target: "Flatpak"
+            platform: "Linux"
+            output-format: "Flatpak"
+            runs-on: "ubuntu-latest"
+            pre-command: "sudo apt update && sudo apt -y install flatpak flatpak-builder"
+            briefcase-run-prefix: "xvfb-run"
+
           - target: "Ubuntu-24.04"
             platform: "Linux"
             output-format: "system"
