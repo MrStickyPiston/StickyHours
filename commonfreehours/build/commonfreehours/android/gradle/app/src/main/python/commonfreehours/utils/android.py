@@ -2,6 +2,8 @@ import java
 
 platform = 'ANDROID'
 
+icon_button_size = 48
+
 def open_url(url):
     Intent = java.jclass("android.content.Intent")
     Uri = java.jclass("android.net.Uri")

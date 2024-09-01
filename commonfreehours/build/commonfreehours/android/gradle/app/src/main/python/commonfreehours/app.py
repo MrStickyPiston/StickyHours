@@ -214,13 +214,29 @@ class CommonFreeHours(toga.App):
         self.main_window.content = self.main_container
 
     def login_setup(self):
+        async def help_portal_id(widget):
+            utils.open_url(self.app.home_page + '#what-is-my-portal-id')
+
+        async def help_linkcode(widget):
+            utils.open_url(self.app.home_page + '#how-do-i-get-a-linkcode')
+
         self.login_box = toga.Box(style=Pack(direction=COLUMN, padding=10))
 
         # Zermelo credentials section
         zermelo_box = toga.Box(style=Pack(direction=COLUMN))
 
         # Zermelo school
-        self.zermelo_school_input = toga.TextInput()
+        self.zermelo_school_input = toga.TextInput(style=Pack(flex=1))
+        wrapper_input_school = toga.Box()
+
+        wrapper_input_school.add(self.zermelo_school_input)
+        wrapper_input_school.add(toga.Box(children=[
+            toga.Button(
+                text='ⓘ',
+                style=Pack(flex=1, width=utils.icon_button_size, height=utils.icon_button_size),
+                on_press=help_portal_id
+            )
+        ]))
 
         school_info_box = toga.Box(style=Pack(direction=COLUMN))
         school_info_box.add(
@@ -228,19 +244,29 @@ class CommonFreeHours(toga.App):
 
         school_box = toga.Box(style=Pack(direction=COLUMN))
         school_box.add(school_info_box)
-        school_box.add(self.zermelo_school_input)
+        school_box.add(wrapper_input_school)
 
         zermelo_box.add(school_box)
 
         # Zermelo password
-        self.zermelo_linkcode = toga.PasswordInput()
+        self.zermelo_linkcode = toga.PasswordInput(style=Pack(flex=1))
+        wrapper_input_linkcode = toga.Box()
+
+        wrapper_input_linkcode.add(self.zermelo_linkcode)
+        wrapper_input_linkcode.add(toga.Box(children=[
+            toga.Button(
+                text='ⓘ',
+                style=Pack(flex=1, width=utils.icon_button_size, height=utils.icon_button_size),
+                on_press=help_linkcode
+            )
+        ]))
         linkcode_info_box = toga.Box(style=Pack(direction=COLUMN))
         linkcode_info_box.add(
             toga.Label(_('auth.linkcode'), style=Pack(font_size=FontSize.l.value)))
 
         linkcode_box = toga.Box(style=Pack(direction=COLUMN))
         linkcode_box.add(linkcode_info_box)
-        linkcode_box.add(self.zermelo_linkcode)
+        linkcode_box.add(wrapper_input_linkcode)
 
         zermelo_box.add(linkcode_box)
 
@@ -282,7 +308,7 @@ class CommonFreeHours(toga.App):
         self.main_window.content = error_box
 
     async def login_help(self, widget):
-        utils.open_url(self.app.home_page.rstrip('/') + '/' + 'login-help')
+        utils.open_url(self.app.home_page.rstrip('/') + '#login-help')
         pass
 
     def login_scheduler(self, widget):

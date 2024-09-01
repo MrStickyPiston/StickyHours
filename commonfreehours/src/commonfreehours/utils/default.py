@@ -10,6 +10,8 @@ locale.setlocale(locale.LC_ALL, '')
 
 button_style = Pack()
 
+icon_button_size = 32
+
 
 def open_url(url: string):
     webbrowser.open(url)

@@ -113,9 +113,21 @@ def get_accounts(zermelo: Zermelo, school_year: int):
         name = f"{teacher['prefix']} {teacher['lastName']}" if teacher['prefix'] else f"{teacher['lastName']}"
         accounts.append({"name": f"{name} ({teacher['code']})", "id": teacher['code'], 'teacher': True})
 
-    # Process the student list
     for student in students:
-        name = f"{student['firstName']} {student['prefix']} {student['lastName']}" if student['prefix'] else f"{student['firstName']} {student['lastName']}"
-        accounts.append({"name": f"{name} ({student['code']})", "id": student['code'], 'teacher': False})
+        name = []
+
+        if not zermelo.get_user().get('isStudent') or zermelo.get_settings().get('studentCanViewProjectNames'):
+            # can use student names
+            name.append(student.get('firstName'))
+
+            if student.get('prefix'):
+                name.append(student.get('prefix'))
+
+            name.append(student.get('lastName'))
+            name.append(f'({student.get('code')})')
+        else:
+            name.append(student.get('code'))
+
+        accounts.append({"name": " ".join(name), "id": student['code'], 'teacher': False})
 
     return accounts

@@ -3,7 +3,7 @@
 project_name = "CommonFreeHours"
 bundle = "dev.mrstickypiston"
 version = "0.0.1"
-url = "https://mrstickypiston.is-a.dev/project/commonfreehours"
+url = "https://mrstickypiston.is-a.dev/projects/cticky-hours"
 license.file = "LICENSE"
 author = "MrStickyPiston"
 author_email = "mr.sticky.piston@gmail.com"
