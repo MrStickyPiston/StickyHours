@@ -34,7 +34,6 @@ class FontSize(Enum):
 lang = Lang()
 _ = lang.translate
 
-@freezegun.freeze_time("2024-6-12")
 class CommonFreeHours(toga.App):
 
     # For except hook
