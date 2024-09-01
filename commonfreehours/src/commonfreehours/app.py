@@ -214,10 +214,10 @@ class CommonFreeHours(toga.App):
 
     def login_setup(self):
         async def help_portal_id(widget):
-            utils.open_url(self.app.home_page + '#what-is-my-portal-id')
+            utils.open_url(self.app.home_page + '#faq-zermelo-portal-id')
 
         async def help_linkcode(widget):
-            utils.open_url(self.app.home_page + '#how-do-i-get-a-linkcode')
+            utils.open_url(self.app.home_page + '#faq-zermelo-get-linkcode-for-login')
 
         self.login_box = toga.Box(style=Pack(direction=COLUMN, padding=10))
 

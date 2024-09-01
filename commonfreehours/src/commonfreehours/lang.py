@@ -27,12 +27,14 @@ class Lang:
         self.languages = {'en': {'auth.button.help': 'Help',
                                  'auth.button.idle': 'Log in',
                                  'auth.button.progress': 'Logging in...',
-                                 'auth.message.failed.credentials': 'Invalid or expired linkcode. Press the "Help" button for more information.',
+                                 'auth.linkcode': 'Zermelo linkcode',
+                                 'auth.message.failed.credentials': 'Invalid or expired linkcode. Press '
+                                                                    'the "Help" button for more '
+                                                                    'information.',
                                  'auth.message.failed.fields': 'Some fields are empty. Please fill in '
                                                                'all fields.',
                                  'auth.message.failed.instance_id': 'Incorrect zermelo instance id.',
                                  'auth.message.failed.title': 'Authentication failed',
-                                 'auth.linkcode': 'Zermelo linkcode',
                                  'auth.school': 'Zermelo portal id',
                                  'auth.window.title': 'Zermelo login',
                                  'command.group.account': 'Account',
@@ -81,11 +83,13 @@ class Lang:
                           'nl': {'auth.button.help': 'Hulp met inloggen',
                                  'auth.button.idle': 'Log in',
                                  'auth.button.progress': 'Aan het inloggen...',
-                                 'auth.message.failed.credentials': 'Verkeerde of verlopen linkcode. Druk op de hulpknop voor meer informatie over linkcodes.',
+                                 'auth.linkcode': 'Zermelo link-code',
+                                 'auth.message.failed.credentials': 'Verkeerde of verlopen linkcode. '
+                                                                    'Druk op de hulpknop voor meer '
+                                                                    'informatie over linkcodes.',
                                  'auth.message.failed.fields': 'Vul alle velden in',
                                  'auth.message.failed.instance_id': 'Incorrecte zermelo portal id',
                                  'auth.message.failed.title': 'Probleem bij inloggen',
-                                 'auth.linkcode': 'Zermelo link-code',
                                  'auth.school': 'Zermelo portal id',
                                  'auth.window.title': 'Zermelo login',
                                  'command.group.account': 'Account',
