@@ -1,9 +1,10 @@
+# from https://briefcase--1980.org.readthedocs.build/en/1980/how-to/ci.html
 name: CI
 on:
   pull_request:
   push:
     branches:
-      - main  # update to match the default branch for your repo
+      - master  # update to match the default branch for your repo
 
 # Cancel active CI runs for a PR before starting another run
 concurrency:
