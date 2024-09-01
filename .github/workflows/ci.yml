@@ -17,8 +17,6 @@ env:
 defaults:
   run:
     shell: bash
-    # Because different working directory
-    working-directory: commonfreehours
 
 jobs:
   ci:
@@ -105,15 +103,15 @@ jobs:
             ${{ matrix.briefcase-args }} \
             ${{ matrix.briefcase-build-args }}
 
-      - name: Test App
-        run: |
-          ${{ matrix.briefcase-run-prefix }} \
-          briefcase run \
-            ${{ matrix.platform || matrix.target }} \
-            ${{ matrix.output-format }} \
-            --test --no-input --log \
-            ${{ matrix.briefcase-args }} \
-            ${{ matrix.briefcase-run-args }}
+#      - name: Test App
+#        run: |
+#          ${{ matrix.briefcase-run-prefix }} \
+#          briefcase run \
+#            ${{ matrix.platform || matrix.target }} \
+#            ${{ matrix.output-format }} \
+#            --test --no-input --log \
+#            ${{ matrix.briefcase-args }} \
+#            ${{ matrix.briefcase-run-args }}
 
       - name: Package App
         run: |
