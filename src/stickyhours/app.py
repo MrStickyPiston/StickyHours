@@ -4,6 +4,7 @@ Easily check for common free hours in zermelo.
 import asyncio
 import logging
 import traceback
+from asyncio import AbstractEventLoop
 from enum import Enum
 from os import mkdir
 from typing import List, Self
@@ -339,7 +340,7 @@ class stickyhours(toga.App):
 
         try:
             loop = asyncio.get_event_loop()
-            if loop.is_closed():
+            if loop.is_closed() or not loop.is_running():
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
             await loop.run_in_executor(None, login)
@@ -447,7 +448,7 @@ class stickyhours(toga.App):
 
         try:
             loop = asyncio.get_event_loop()
-            if loop.is_closed():
+            if loop.is_closed() or not loop.is_running():
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
             await loop.run_in_executor(None, sync)

@@ -25,7 +25,6 @@ def get_school_year(date = None):
     if date is None:
         date = datetime.now()
     if date.month < 8:
-        # TODO: change to < 8 after testing
         return date.year - 1
     else:
         return date.year
@@ -184,7 +183,6 @@ class Zermelo:
             raise ZermeloAuthException('Not logged in')
 
         if self.get_user().get('isStudent'):
-            # TODO: check if this is the right one
             self.require_setting('studentCanViewProjectSchedules', True, 'studentsindepartments', school_year)
         else:
             self.require_setting('employeeCanViewProjectSchedules', True, 'studentsindepartments', school_year)
@@ -209,7 +207,6 @@ class Zermelo:
             raise ZermeloAuthException('Not logged in')
 
         if self.get_user().get('isStudent'):
-            # TODO: check if this is the right one
             self.require_setting('studentCanViewRelatedTeacherSchedules', True, 'contracts', school_year)
         else:
             self.require_setting('employeeCanViewColleagueSchedules', True, 'contracts', school_year)
@@ -308,7 +305,6 @@ class Zermelo:
                 raise ZermeloApiNetworkError("Could not reach the zermelo servers")
 
             except requests.exceptions.HTTPError:
-                # TODO: HTTP 500 zermelo bug
                 if r.status_code == 404:
                     self.logger.error(f"Instance {instance_id} does not exist.")
                     raise ZermeloValueError(f"Incorrect instance id: {instance_id}")
@@ -417,7 +413,6 @@ class Zermelo:
         validate_instance(instance_id)
 
         # Send a request with the code to get the token.
-        # TODO: client secret
         data = {
             'code': code,
             'grant_type': 'authorization_code',

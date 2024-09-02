@@ -89,7 +89,7 @@ class stickyhours(toga.App):
             try:
                 self.zermelo.token_login(self.user_config.get('token'), self.user_config.get('instance_id'))
                 logging.info(
-                    f"Logged in with existing token with account on {self.user_config.get('school')}")
+                    f"Logged in with existing token with account on {self.user_config.get('instance_id')}")
                 self.get_account_options()
                 self.main()
 
@@ -284,7 +284,8 @@ class stickyhours(toga.App):
         self.logout_command.enabled = False
 
         try:
-            self.zermelo_school_input.value = self.user_config.get('school')
+            self.zermelo_linkcode.value = ""
+            self.zermelo_school_input.value = self.user_config.get('instance_id')
         except Exception as e:
             self.handle_exception(e)
 
@@ -325,9 +326,6 @@ class stickyhours(toga.App):
             self.login_button.enabled = True
             self.login_button.text = _('auth.button.idle')
 
-        await asyncio.sleep(0)  # Yield to event loop briefly
-        loop = asyncio.get_event_loop()
-
         if self.zermelo_school_input.value == '' or self.zermelo_linkcode.value == '':
             await self.main_window.error_dialog(_('auth.message.failed.title'), _('auth.message.failed.fields'))
             return
@@ -339,6 +337,10 @@ class stickyhours(toga.App):
             f"Logging in on {self.zermelo_school_input.value}")
 
         try:
+            loop = asyncio.get_event_loop()
+            if loop.is_closed():
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
             await loop.run_in_executor(None, login)
         except ZermeloValueError:
             logging.info(f"Invalid instance id: {self.zermelo_school_input.value.strip()}")
@@ -426,9 +428,6 @@ class stickyhours(toga.App):
             self.compute_button.enabled = True
             self.compute_button.text = _('main.button.idle')
 
-        await asyncio.sleep(0)  # Yield to event loop briefly
-        loop = asyncio.get_event_loop()
-
         self.compute_button.enabled = False
         self.compute_button.text = _('main.button.processing')
 
@@ -446,6 +445,10 @@ class stickyhours(toga.App):
                 ids.append(entry.get_value().id)
 
         try:
+            loop = asyncio.get_event_loop()
+            if loop.is_closed():
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
             await loop.run_in_executor(None, sync)
         except Exception as e:
             done()
