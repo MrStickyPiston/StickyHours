@@ -4,6 +4,7 @@ Easily check for common free hours in zermelo.
 import asyncio
 import logging
 import traceback
+from asyncio import AbstractEventLoop
 from enum import Enum
 from os import mkdir
 from typing import List, Self
@@ -315,6 +316,7 @@ class stickyhours(toga.App):
         asyncio.create_task(self.login_task())
 
     async def login_task(self):
+        await self.main_window.info_dialog("1", "")
         def login():
             self.zermelo.code_login(
                 self.zermelo_linkcode.value,
@@ -322,26 +324,41 @@ class stickyhours(toga.App):
             )
             self.get_account_options()
 
+        await self.main_window.info_dialog("2", "")
+
         def done():
             self.login_button.enabled = True
             self.login_button.text = _('auth.button.idle')
+
+        await self.main_window.info_dialog("3", "")
 
         if self.zermelo_school_input.value == '' or self.zermelo_linkcode.value == '':
             await self.main_window.error_dialog(_('auth.message.failed.title'), _('auth.message.failed.fields'))
             return
 
+        await self.main_window.info_dialog("4", "")
+
         self.login_button.enabled = False
         self.login_button.text = _('auth.button.progress')
+
+        await self.main_window.info_dialog("5", "")
 
         logging.info(
             f"Logging in on {self.zermelo_school_input.value}")
 
+        await self.main_window.info_dialog("6", "")
+
         try:
             loop = asyncio.get_event_loop()
-            if loop.is_closed():
+            await self.main_window.info_dialog("7", "")
+            if loop.is_closed() or not loop.is_running():
+                await self.main_window.info_dialog("8", "")
                 loop = asyncio.new_event_loop()
+                await self.main_window.info_dialog("9", "")
                 asyncio.set_event_loop(loop)
+            await self.main_window.info_dialog("10", "")
             await loop.run_in_executor(None, login)
+            await self.main_window.info_dialog("11", "")
         except ZermeloValueError:
             logging.info(f"Invalid instance id: {self.zermelo_school_input.value.strip()}")
             done()
@@ -446,7 +463,7 @@ class stickyhours(toga.App):
 
         try:
             loop = asyncio.get_event_loop()
-            if loop.is_closed():
+            if loop.is_closed() or not loop.is_running():
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
             await loop.run_in_executor(None, sync)
