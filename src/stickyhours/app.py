@@ -81,8 +81,8 @@ class stickyhours(toga.App):
         self.main_setup()
 
         if (
-                self.user_config.get('instance_id', '') == '' or
-                self.user_config.get('token', '') == ''):
+            self.user_config.get('instance_id', '') == '' or
+            self.user_config.get('token', '') == ''):
             logging.info(f"Empty value in user in config, logging in again.")
             self.login_view()
         else:
@@ -315,49 +315,36 @@ class stickyhours(toga.App):
         asyncio.create_task(self.login_task())
 
     async def login_task(self):
-        await self.main_window.info_dialog("1", "")
         def login():
+            self.main_window.info_dialog("it works", "")
             self.zermelo.code_login(
                 self.zermelo_linkcode.value,
                 self.zermelo_school_input.value,
             )
+            self.main_window.info_dialog("it works 2", "")
             self.get_account_options()
-
-        await self.main_window.info_dialog("2", "")
+            self.main_window.info_dialog("it works 3", "")
 
         def done():
             self.login_button.enabled = True
             self.login_button.text = _('auth.button.idle')
 
-        await self.main_window.info_dialog("3", "")
-
         if self.zermelo_school_input.value == '' or self.zermelo_linkcode.value == '':
             await self.main_window.error_dialog(_('auth.message.failed.title'), _('auth.message.failed.fields'))
             return
 
-        await self.main_window.info_dialog("4", "")
-
         self.login_button.enabled = False
         self.login_button.text = _('auth.button.progress')
-
-        await self.main_window.info_dialog("5", "")
 
         logging.info(
             f"Logging in on {self.zermelo_school_input.value}")
 
-        await self.main_window.info_dialog("6", "")
-
         try:
             loop = asyncio.get_event_loop()
-            await self.main_window.info_dialog("7", "")
             if loop.is_closed() or not loop.is_running():
-                await self.main_window.info_dialog("8", "")
                 loop = asyncio.new_event_loop()
-                await self.main_window.info_dialog("9", "")
                 asyncio.set_event_loop(loop)
-            await self.main_window.info_dialog("10", "")
             await loop.run_in_executor(None, login)
-            await self.main_window.info_dialog("11", "")
         except ZermeloValueError:
             logging.info(f"Invalid instance id: {self.zermelo_school_input.value.strip()}")
             done()
@@ -480,9 +467,9 @@ class stickyhours(toga.App):
 
         for entry in entries:
             self.result_box.add(
-                toga.Label(
-                    entry.name,
-                    style=Pack(font_size=FontSize.s.value)))
+            toga.Label(
+                entry.name,
+                style=Pack(font_size=FontSize.s.value)))
 
         for day in self.common_gaps_cache.keys():
             if not self.common_gaps_cache.get(day):
