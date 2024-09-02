@@ -3,6 +3,7 @@ Easily check for common free hours in zermelo.
 """
 import asyncio
 import logging
+import threading
 import traceback
 from enum import Enum
 from os import mkdir
@@ -312,25 +313,15 @@ class stickyhours(toga.App):
         pass
 
     def login_scheduler(self, widget):
-        asyncio.create_task(self.login_task())
+        threading.Thread(target=self.login_task).start()
 
-    async def login_task(self):
-        def login():
-            self.main_window.info_dialog("it works", "")
-            self.zermelo.code_login(
-                self.zermelo_linkcode.value,
-                self.zermelo_school_input.value,
-            )
-            self.main_window.info_dialog("it works 2", "")
-            self.get_account_options()
-            self.main_window.info_dialog("it works 3", "")
-
+    def login_task(self):
         def done():
             self.login_button.enabled = True
             self.login_button.text = _('auth.button.idle')
 
         if self.zermelo_school_input.value == '' or self.zermelo_linkcode.value == '':
-            await self.main_window.error_dialog(_('auth.message.failed.title'), _('auth.message.failed.fields'))
+            self.main_window.error_dialog(_('auth.message.failed.title'), _('auth.message.failed.fields'))
             return
 
         self.login_button.enabled = False
@@ -340,21 +331,21 @@ class stickyhours(toga.App):
             f"Logging in on {self.zermelo_school_input.value}")
 
         try:
-            loop = asyncio.get_event_loop()
-            if loop.is_closed() or not loop.is_running():
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-            await loop.run_in_executor(None, login)
+            self.zermelo.code_login(
+                self.zermelo_linkcode.value,
+                self.zermelo_school_input.value,
+            )
+            self.get_account_options()
         except ZermeloValueError:
             logging.info(f"Invalid instance id: {self.zermelo_school_input.value.strip()}")
             done()
-            await self.main_window.error_dialog(_('auth.message.failed.title'), _('auth.message.failed.instance_id'))
+            self.main_window.error_dialog(_('auth.message.failed.title'), _('auth.message.failed.instance_id'))
 
             return
         except ZermeloAuthException:
             logging.info(f"Invalid username or password")
             done()
-            await self.main_window.error_dialog(_('auth.message.failed.title'), _('auth.message.failed.credentials'))
+            self.main_window.error_dialog(_('auth.message.failed.title'), _('auth.message.failed.credentials'))
 
             return
         except Exception as e:
@@ -405,10 +396,30 @@ class stickyhours(toga.App):
         logging.info("Logged out")
 
     def compute_scheduler(self, widget):
-        asyncio.create_task(self.compute())
+        threading.Thread(target=self.compute).start()
 
-    async def compute(self):
-        def sync():
+    def compute(self):
+        def done():
+            self.compute_button.enabled = True
+            self.compute_button.text = _('main.button.idle')
+
+        self.compute_button.enabled = False
+        self.compute_button.text = _('main.button.processing')
+
+        entries = []
+        ids = []
+
+        # Keep requests down to a minimum by removing duplicates.
+        for entry in self.entries:
+            if entry.get_value() is None:
+                self.main_window.error_dialog(_('main.message.no_schedule_user.title'), _('main.message.no_schedule_user.message'))
+                done()
+                return
+            elif entry.get_value().id not in ids:
+                entries.append(entry.get_value())
+                ids.append(entry.get_value().id)
+
+        try:
             gaps = []
 
             for v in set(entries):
@@ -426,33 +437,6 @@ class stickyhours(toga.App):
                 gaps.append(g)
 
             self.common_gaps_cache = get_common_gaps(*gaps)
-
-        def done():
-            self.compute_button.enabled = True
-            self.compute_button.text = _('main.button.idle')
-
-        self.compute_button.enabled = False
-        self.compute_button.text = _('main.button.processing')
-
-        entries = []
-        ids = []
-
-        # Keep requests down to a minimum by removing duplicates.
-        for entry in self.entries:
-            if entry.get_value() is None:
-                await self.main_window.error_dialog(_('main.message.no_schedule_user.title'), _('main.message.no_schedule_user.message'))
-                done()
-                return
-            elif entry.get_value().id not in ids:
-                entries.append(entry.get_value())
-                ids.append(entry.get_value().id)
-
-        try:
-            loop = asyncio.get_event_loop()
-            if loop.is_closed() or not loop.is_running():
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-            await loop.run_in_executor(None, sync)
         except Exception as e:
             done()
             self.handle_exception(e)
