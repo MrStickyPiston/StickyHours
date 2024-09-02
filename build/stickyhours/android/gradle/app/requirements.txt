@@ -1,0 +1,6 @@
+# Generated 2024-09-02 10:51:26.654530
+requests
+pytz
+babel
+freezegun
+toga-android~=0.4.5

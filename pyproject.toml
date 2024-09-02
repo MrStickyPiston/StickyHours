@@ -1,6 +1,6 @@
 # This project was generated with 0.3.19 using template: https://github.com/beeware/briefcase-template@v0.3.19
 [tool.briefcase]
-project_name = "CommonFreeHours"
+project_name = "StickyHours"
 bundle = "dev.mrstickypiston"
 version = "0.0.1"
 url = "https://mrstickypiston.is-a.dev/projects/sticky-hours"
@@ -8,14 +8,14 @@ license.file = "LICENSE"
 author = "MrStickyPiston"
 author_email = "mr.sticky.piston@gmail.com"
 
-[tool.briefcase.app.commonfreehours]
+[tool.briefcase.app.stickyhours]
 formal_name = "Sticky Hours"
 description = "Easily check for common free hours in zermelo."
 long_description = """Edit this description in pyproject.toml"""
 icon = "icons/icon"
 splash_background_color = "#00CC69"
 sources = [
-    "src/commonfreehours",
+    "src/stickyhours",
 ]
 test_sources = [
     "tests",
@@ -32,19 +32,19 @@ test_requires = [
     "pytest",
 ]
 
-[tool.briefcase.app.commonfreehours.macOS]
+[tool.briefcase.app.stickyhours.macOS]
 universal_build = true
 requires = [
     "toga-cocoa~=0.4.5",
     "std-nslog~=1.0.0",
 ]
 
-[tool.briefcase.app.commonfreehours.linux]
+[tool.briefcase.app.stickyhours.linux]
 requires = [
     "toga-gtk~=0.4.5",
 ]
 
-[tool.briefcase.app.commonfreehours.linux.system.debian]
+[tool.briefcase.app.stickyhours.linux.system.debian]
 system_requires = [
     # Needed to compile pycairo wheel
     "libcairo2-dev",
@@ -63,7 +63,7 @@ system_runtime_requires = [
     # "gir1.2-webkit2-4.1",
 ]
 
-[tool.briefcase.app.commonfreehours.linux.system.rhel]
+[tool.briefcase.app.stickyhours.linux.system.rhel]
 system_requires = [
     # Needed to compile pycairo wheel
     "cairo-gobject-devel",
@@ -82,7 +82,7 @@ system_runtime_requires = [
     # "webkit2gtk3",
 ]
 
-[tool.briefcase.app.commonfreehours.linux.system.suse]
+[tool.briefcase.app.stickyhours.linux.system.suse]
 system_requires = [
     # Needed to compile pycairo wheel
     "cairo-devel",
@@ -101,7 +101,7 @@ system_runtime_requires = [
     # "libwebkit2gtk3", "typelib(WebKit2)",
 ]
 
-[tool.briefcase.app.commonfreehours.linux.system.arch]
+[tool.briefcase.app.stickyhours.linux.system.arch]
 system_requires = [
     # Needed to compile pycairo wheel
     "cairo",
@@ -128,7 +128,7 @@ system_runtime_requires = [
     # "webkit2gtk",
 ]
 
-[tool.briefcase.app.commonfreehours.linux.appimage]
+[tool.briefcase.app.stickyhours.linux.appimage]
 manylinux = "manylinux_2_28"
 
 system_requires = [
@@ -149,24 +149,24 @@ linuxdeploy_plugins = [
     "DEPLOY_GTK_VERSION=3 gtk",
 ]
 
-[tool.briefcase.app.commonfreehours.linux.flatpak]
+[tool.briefcase.app.stickyhours.linux.flatpak]
 flatpak_runtime = "org.gnome.Platform"
 flatpak_runtime_version = "45"
 flatpak_sdk = "org.gnome.Sdk"
 
-[tool.briefcase.app.commonfreehours.windows]
+[tool.briefcase.app.stickyhours.windows]
 requires = [
     "toga-winforms~=0.4.5",
 ]
 
 # Mobile deployments
-[tool.briefcase.app.commonfreehours.iOS]
+[tool.briefcase.app.stickyhours.iOS]
 requires = [
     "toga-iOS~=0.4.5",
     "std-nslog~=1.0.0",
 ]
 
-[tool.briefcase.app.commonfreehours.android]
+[tool.briefcase.app.stickyhours.android]
 requires = [
     "toga-android~=0.4.5",
 ]
@@ -182,7 +182,7 @@ build_gradle_dependencies = [
 ]
 
 # Web deployments
-[tool.briefcase.app.commonfreehours.web]
+[tool.briefcase.app.stickyhours.web]
 requires = [
     "toga-web~=0.4.5",
 ]
