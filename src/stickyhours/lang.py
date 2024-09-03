@@ -65,6 +65,8 @@ class Lang:
                                  'error.other.message': 'Something went wrong. Please report the error '
                                                         'below to the issue tracker.',
                                  'error.other.title': 'Unexpected error',
+                                 'error.timeout.message': 'Could not fetch the api data in time. Please try again.',
+                                 'error.timeout.title': 'Error: api request timed out',
                                  'error.window.error_below': 'See the error below:',
                                  'error.window.title': 'Errors',
                                  'main.button.add_entry': 'Add user',
@@ -83,7 +85,7 @@ class Lang:
                           'nl': {'auth.button.help': 'Hulp met inloggen',
                                  'auth.button.idle': 'Log in',
                                  'auth.button.progress': 'Aan het inloggen...',
-                                 'auth.linkcode': 'Zermelo link-code',
+                                 'auth.linkcode': 'Zermelo linkcode',
                                  'auth.message.failed.credentials': 'Verkeerde of verlopen linkcode. '
                                                                     'Druk op de hulpknop voor meer '
                                                                     'informatie over linkcodes.',
@@ -121,6 +123,8 @@ class Lang:
                                  'error.other.message': 'Er is iets misgegaan. Rapporteer deze fout op '
                                                         'de issuetracker.',
                                  'error.other.title': 'Onverwachte fout',
+                                 'error.timeout.message': 'Kon de data niet op tijd ophalen van de API. Probeer het later nog eens.',
+                                 'error.timeout.title': 'Error: verzoek aan api duurt te lang',
                                  'error.window.error_below': 'Zie de fout hieronder:',
                                  'error.window.title': 'Fouten',
                                  'main.button.add_entry': 'Gebruiker toevoegen',

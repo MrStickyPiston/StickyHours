@@ -1,6 +1,7 @@
 """
 Easily check for common free hours in zermelo.
 """
+import asyncio
 import logging
 import time
 import traceback
@@ -337,7 +338,12 @@ class stickyhours(toga.App):
             f"Logging in on {self.zermelo_school_input.value}")
 
         try:
-            await self.loop.run_in_executor(None, sync)
+            await asyncio.wait_for(self.loop.run_in_executor(None, sync), timeout=20)
+        except asyncio.TimeoutError:
+            # Handle timeout
+            done()
+            await self.main_window.error_dialog(_('error.timeout.title'), _('error.timeout.message'))
+            return
         except ZermeloValueError:
             logging.info(f"Invalid instance id: {self.zermelo_school_input.value.strip()}")
             done()
@@ -441,7 +447,12 @@ class stickyhours(toga.App):
                 ids.append(entry.get_value().id)
 
         try:
-            await self.loop.run_in_executor(None, sync)
+            await asyncio.wait_for(self.loop.run_in_executor(None, sync), timeout=20)
+        except asyncio.TimeoutError:
+            # Handle timeout
+            done()
+            await self.main_window.error_dialog(_('error.timeout.title'), _('error.timeout.message'))
+            return
         except Exception as e:
             done()
             self.handle_exception(e)
