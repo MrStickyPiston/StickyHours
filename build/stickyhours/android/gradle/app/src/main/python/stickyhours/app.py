@@ -3,7 +3,9 @@ Easily check for common free hours in zermelo.
 """
 import asyncio
 import logging
+import time
 import traceback
+from asyncio import timeout
 from enum import Enum
 from typing import List, Self
 
@@ -308,7 +310,7 @@ class stickyhours(toga.App):
         self.main_window.content = error_box
 
     async def login_help(self, widget):
-        utils.open_url(self.app.home_page.rstrip('/') + '#login-help')
+        utils.open_url(self.app.home_page.rstrip('/') + '#faq-how-to-log-in')
         pass
 
     async def login_task(self, widget=None):
