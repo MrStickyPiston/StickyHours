@@ -1,13 +1,10 @@
 """
 Easily check for common free hours in zermelo.
 """
-import asyncio
 import logging
-import threading
 import time
 import traceback
 from enum import Enum
-from os import mkdir
 from typing import List, Self
 
 import freezegun
@@ -15,7 +12,7 @@ import toga
 import configparser
 
 from toga.style import Pack
-from toga.style.pack import COLUMN, ROW
+from toga.style.pack import COLUMN
 import toga.platform
 
 from stickyhours.lang import Lang
@@ -316,6 +313,9 @@ class stickyhours(toga.App):
 
     async def login_task(self, widget=None):
         def sync():
+            # Workaround for crash on Windows. IDK why it's needed. Note that on some devices another time may be required
+            time.sleep(0.1)
+
             self.zermelo.code_login(
                 self.zermelo_linkcode.value,
                 self.zermelo_school_input.value,
@@ -399,6 +399,9 @@ class stickyhours(toga.App):
 
     async def compute(self, widget=None):
         def sync():
+            # Workaround for crash on Windows. IDK why it's needed. Note that on some devices another time may be required
+            time.sleep(0.1)
+
             gaps = []
 
             for v in set(entries):
