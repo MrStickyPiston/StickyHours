@@ -5,6 +5,7 @@ import asyncio
 import logging
 import time
 import traceback
+from asyncio import timeout
 from enum import Enum
 from typing import List, Self
 
@@ -313,16 +314,6 @@ class stickyhours(toga.App):
         pass
 
     async def login_task(self, widget=None):
-        def sync():
-            # Workaround for crash on Windows. IDK why it's needed. Note that on some devices another time may be required
-            time.sleep(0.1)
-
-            self.zermelo.code_login(
-                self.zermelo_linkcode.value,
-                self.zermelo_school_input.value,
-            )
-            self.get_account_options()
-
         def done():
             self.login_button.enabled = True
             self.login_button.text = _('auth.button.idle')
@@ -338,7 +329,23 @@ class stickyhours(toga.App):
             f"Logging in on {self.zermelo_school_input.value}")
 
         try:
-            await asyncio.wait_for(self.loop.run_in_executor(None, sync), timeout=20)
+            await asyncio.wait_for(
+                self.loop.run_in_executor(
+                    None,
+                    self.zermelo.code_login,
+                    self.zermelo_linkcode.value, self.zermelo_school_input.value
+                ),
+                timeout = 20
+            )
+
+            await asyncio.wait_for(
+                self.loop.run_in_executor(
+                    None,
+                    self.get_account_options()
+                ),
+                timeout = 20
+            )
+
         except asyncio.TimeoutError:
             # Handle timeout
             done()
@@ -404,28 +411,6 @@ class stickyhours(toga.App):
         logging.info("Logged out")
 
     async def compute(self, widget=None):
-        def sync():
-            # Workaround for crash on Windows. IDK why it's needed. Note that on some devices another time may be required
-            time.sleep(0.1)
-
-            gaps = []
-
-            for v in set(entries):
-                logging.info(f"Fetching {v.id}")
-
-                a = self.zermelo.get_current_weeks_appointments(user=v.id, is_teacher=v.teacher, weeks=int(self.weeks_amount_input.value), valid_only=True)
-                if not a:
-                    # no schedule found
-                    break
-                logging.info(f"Preprocessing {v.id}")
-                g = process_appointments(a)
-                if not g:
-                    # no gaps are found for this user
-                    break
-                gaps.append(g)
-
-            self.common_gaps_cache = get_common_gaps(*gaps)
-
         def done():
             self.compute_button.enabled = True
             self.compute_button.text = _('main.button.idle')
@@ -447,7 +432,25 @@ class stickyhours(toga.App):
                 ids.append(entry.get_value().id)
 
         try:
-            await asyncio.wait_for(self.loop.run_in_executor(None, sync), timeout=20)
+            gaps = []
+
+            for v in set(entries):
+                logging.info(f"Fetching {v.id}")
+
+                a = await asyncio.wait_for(self.loop.run_in_executor(None, self.zermelo.get_current_weeks_appointments, v.id, v.teacher, int(self.weeks_amount_input.value), True), timeout=20)
+
+                if not a:
+                    # no schedule found
+                    break
+                logging.info(f"Preprocessing {v.id}")
+                g = process_appointments(a)
+                if not g:
+                    # no gaps are found for this user
+                    break
+                gaps.append(g)
+
+            self.common_gaps_cache = get_common_gaps(*gaps)
+
         except asyncio.TimeoutError:
             # Handle timeout
             done()
