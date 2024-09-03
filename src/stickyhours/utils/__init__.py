@@ -8,3 +8,5 @@ if toga.platform.get_current_platform() == 'android':
     from .android import *
 elif toga.platform.get_current_platform() == 'iOS':
     from .ios import *
+if toga.platform.get_current_platform() == 'windows':
+    from .windows import *
