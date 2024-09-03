@@ -4,6 +4,7 @@ Easily check for common free hours in zermelo.
 import asyncio
 import logging
 import threading
+import time
 import traceback
 from enum import Enum
 from os import mkdir
@@ -16,6 +17,7 @@ import configparser
 from toga.style import Pack
 from toga.style.pack import COLUMN, ROW
 import toga.platform
+
 from stickyhours.lang import Lang
 from .commonFreeHours import get_accounts, process_appointments, get_common_gaps
 from .accountentry import AccountEntry
@@ -184,7 +186,7 @@ class stickyhours(toga.App):
         weeks_amount_label = toga.Label(text=_('main.label.weeks_amount'), style=Pack(font_size=FontSize.xl.value))
         self.weeks_amount_input = toga.Selection(items=[1, 2, 3, 4, 5])
 
-        self.compute_button = toga.Button(_('main.button.idle'), on_press=self.compute_scheduler, style=utils.button_style)
+        self.compute_button = toga.Button(_('main.button.idle'), on_press=self.compute, style=utils.button_style)
 
         self.result_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 5)))
 
@@ -270,7 +272,7 @@ class stickyhours(toga.App):
 
         zermelo_box.add(linkcode_box)
 
-        self.login_button = toga.Button(_('auth.button.idle'), on_press=self.login_scheduler, style=utils.button_style)
+        self.login_button = toga.Button(_('auth.button.idle'), on_press=self.login_task, style=utils.button_style)
         self.login_help_button = toga.Button(_('auth.button.help'), on_press=self.login_help, style=utils.button_style)
 
         # Add Zermelo section to main box
@@ -312,16 +314,20 @@ class stickyhours(toga.App):
         utils.open_url(self.app.home_page.rstrip('/') + '#login-help')
         pass
 
-    def login_scheduler(self, widget):
-        threading.Thread(target=self.login_task).start()
+    async def login_task(self):
+        def sync():
+            self.zermelo.code_login(
+                self.zermelo_linkcode.value,
+                self.zermelo_school_input.value,
+            )
+            self.get_account_options()
 
-    def login_task(self):
         def done():
             self.login_button.enabled = True
             self.login_button.text = _('auth.button.idle')
 
         if self.zermelo_school_input.value == '' or self.zermelo_linkcode.value == '':
-            self.main_window.error_dialog(_('auth.message.failed.title'), _('auth.message.failed.fields'))
+            await self.main_window.error_dialog(_('auth.message.failed.title'), _('auth.message.failed.fields'))
             return
 
         self.login_button.enabled = False
@@ -331,21 +337,17 @@ class stickyhours(toga.App):
             f"Logging in on {self.zermelo_school_input.value}")
 
         try:
-            self.zermelo.code_login(
-                self.zermelo_linkcode.value,
-                self.zermelo_school_input.value,
-            )
-            self.get_account_options()
+            await self.loop.run_in_executor(None, sync)
         except ZermeloValueError:
             logging.info(f"Invalid instance id: {self.zermelo_school_input.value.strip()}")
             done()
-            self.main_window.error_dialog(_('auth.message.failed.title'), _('auth.message.failed.instance_id'))
+            await self.main_window.error_dialog(_('auth.message.failed.title'), _('auth.message.failed.instance_id'))
 
             return
         except ZermeloAuthException:
             logging.info(f"Invalid username or password")
             done()
-            self.main_window.error_dialog(_('auth.message.failed.title'), _('auth.message.failed.credentials'))
+            await self.main_window.error_dialog(_('auth.message.failed.title'), _('auth.message.failed.credentials'))
 
             return
         except Exception as e:
@@ -395,31 +397,8 @@ class stickyhours(toga.App):
 
         logging.info("Logged out")
 
-    def compute_scheduler(self, widget):
-        threading.Thread(target=self.compute).start()
-
-    def compute(self):
-        def done():
-            self.compute_button.enabled = True
-            self.compute_button.text = _('main.button.idle')
-
-        self.compute_button.enabled = False
-        self.compute_button.text = _('main.button.processing')
-
-        entries = []
-        ids = []
-
-        # Keep requests down to a minimum by removing duplicates.
-        for entry in self.entries:
-            if entry.get_value() is None:
-                self.main_window.error_dialog(_('main.message.no_schedule_user.title'), _('main.message.no_schedule_user.message'))
-                done()
-                return
-            elif entry.get_value().id not in ids:
-                entries.append(entry.get_value())
-                ids.append(entry.get_value().id)
-
-        try:
+    async def compute(self, widget=None):
+        def sync():
             gaps = []
 
             for v in set(entries):
@@ -437,6 +416,29 @@ class stickyhours(toga.App):
                 gaps.append(g)
 
             self.common_gaps_cache = get_common_gaps(*gaps)
+
+        def done():
+            self.compute_button.enabled = True
+            self.compute_button.text = _('main.button.idle')
+
+        self.compute_button.enabled = False
+        self.compute_button.text = _('main.button.processing')
+
+        entries = []
+        ids = []
+
+        # Keep requests down to a minimum by removing duplicates.
+        for entry in self.entries:
+            if entry.get_value() is None:
+                await self.main_window.error_dialog(_('main.message.no_schedule_user.title'), _('main.message.no_schedule_user.message'))
+                done()
+                return
+            elif entry.get_value().id not in ids:
+                entries.append(entry.get_value())
+                ids.append(entry.get_value().id)
+
+        try:
+            await self.loop.run_in_executor(None, sync)
         except Exception as e:
             done()
             self.handle_exception(e)
