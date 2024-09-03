@@ -314,7 +314,7 @@ class stickyhours(toga.App):
         utils.open_url(self.app.home_page.rstrip('/') + '#login-help')
         pass
 
-    async def login_task(self):
+    async def login_task(self, widget=None):
         def sync():
             self.zermelo.code_login(
                 self.zermelo_linkcode.value,
