@@ -436,13 +436,15 @@ class stickyhours(toga.App):
 
             for v in set(entries):
                 logging.info(f"Fetching {v.id}")
+                self.compute_button.text = _('main.button.fetching.user').format(v.id)
 
                 a = await asyncio.wait_for(self.loop.run_in_executor(None, self.zermelo.get_current_weeks_appointments, v.id, v.teacher, int(self.weeks_amount_input.value), True), timeout=20)
 
                 if not a:
                     # no schedule found
                     break
-                logging.info(f"Preprocessing {v.id}")
+                logging.info(f"Processing {v.id}")
+                self.compute_button.text = _('main.button.processing.user').format(v.id)
                 g = process_appointments(a)
                 if not g:
                     # no gaps are found for this user
