@@ -34,11 +34,12 @@ class FontSize(Enum):
     xl = 19
     xxl = 22
 
+
 lang = Lang()
 _ = lang.translate
 
-class stickyhours(toga.App):
 
+class stickyhours(toga.App):
     # For except hook
     instance: Self = None
 
@@ -83,8 +84,8 @@ class stickyhours(toga.App):
         self.main_setup()
 
         if (
-            self.user_config.get('instance_id', '') == '' or
-            self.user_config.get('token', '') == ''):
+                self.user_config.get('instance_id', '') == '' or
+                self.user_config.get('token', '') == ''):
             logging.info(f"Empty value in user in config, logging in again.")
             self.login_view()
         else:
@@ -124,8 +125,13 @@ class stickyhours(toga.App):
             self.main_window.error_dialog(_('error.data.title'), _('error.data.message'))
             message = _('error.data.message')
         except ZermeloFunctionSettingsError:
-            self.main_window.error_dialog(_('error.function_settings.title'), _('error.function_settings.message').format(exception.setting, exception.value, exception.required_value, exception.endpoint))
-            message = _('error.function_settings.message').format(exception.setting, exception.value, exception.required_value, exception.endpoint)
+            self.main_window.error_dialog(_('error.function_settings.title'),
+                                          _('error.function_settings.message').format(exception.setting,
+                                                                                      exception.value,
+                                                                                      exception.required_value,
+                                                                                      exception.endpoint))
+            message = _('error.function_settings.message').format(exception.setting, exception.value,
+                                                                  exception.required_value, exception.endpoint)
         except ZermeloApiHttpStatusException:
             self.main_window.error_dialog(_('error.http_status.title'), _('error.http_status.message'))
             message = _('error.http_status.message')
@@ -133,16 +139,17 @@ class stickyhours(toga.App):
         except:
             # android has no stacktrace dialog
             if utils.platform == "ANDROID":
-                self.main_window.error_dialog(_('error.other.title'), _('error.other.message') + "\n\n" + traceback.format_exc())
+                self.main_window.error_dialog(_('error.other.title'),
+                                              _('error.other.message') + "\n\n" + traceback.format_exc())
             else:
-                self.main_window.stack_trace_dialog(_('error.other.title'), _('error.other.message'), traceback.format_exc())
+                self.main_window.stack_trace_dialog(_('error.other.title'), _('error.other.message'),
+                                                    traceback.format_exc())
 
             message = _('error.other.message')
             show_traceback = True
         finally:
             if show_error_view:
                 self.error_view(message, show_traceback)
-
 
     def get_account_options(self):
         if self.accounts:
@@ -300,7 +307,8 @@ class stickyhours(toga.App):
 
         error_box = toga.Box(style=Pack(flex=1, direction=COLUMN))
 
-        error_text = toga.MultilineTextInput(value=message, readonly=True, style=Pack(flex=1, font_size=FontSize.s.value, padding=10))
+        error_text = toga.MultilineTextInput(value=message, readonly=True,
+                                             style=Pack(flex=1, font_size=FontSize.s.value, padding=10))
 
         if show_traceback:
             error_text.value += "\n\n" + _('error.window.error_below') + "\n\n" + traceback.format_exc()
@@ -335,15 +343,15 @@ class stickyhours(toga.App):
                     self.zermelo.code_login,
                     self.zermelo_linkcode.value, self.zermelo_school_input.value
                 ),
-                timeout = 20
+                timeout=20
             )
 
             await asyncio.wait_for(
                 self.loop.run_in_executor(
                     None,
-                    self.get_account_options()
+                    self.get_account_options
                 ),
-                timeout = 20
+                timeout=20
             )
 
         except asyncio.TimeoutError:
@@ -424,7 +432,8 @@ class stickyhours(toga.App):
         # Keep requests down to a minimum by removing duplicates.
         for entry in self.entries:
             if entry.get_value() is None:
-                await self.main_window.error_dialog(_('main.message.no_schedule_user.title'), _('main.message.no_schedule_user.message'))
+                await self.main_window.error_dialog(_('main.message.no_schedule_user.title'),
+                                                    _('main.message.no_schedule_user.message'))
                 done()
                 return
             elif entry.get_value().id not in ids:
@@ -436,13 +445,19 @@ class stickyhours(toga.App):
 
             for v in set(entries):
                 logging.info(f"Fetching {v.id}")
+                self.compute_button.text = _('main.button.fetching.user').format(v.id)
 
-                a = await asyncio.wait_for(self.loop.run_in_executor(None, self.zermelo.get_current_weeks_appointments, v.id, v.teacher, int(self.weeks_amount_input.value), True), timeout=20)
+                a = await asyncio.wait_for(
+                    self.loop.run_in_executor(None, self.zermelo.get_current_weeks_appointments, v.id, v.teacher,
+                                              int(self.weeks_amount_input.value), True), timeout=20)
 
-                if not a:
-                    # no schedule found
+                if not a or a == {}:
+                    await self.main_window.error_dialog(_('main.message.no_schedule_user.title'), _('main.message.no_schedule_user.message').format(v.id))
                     break
-                logging.info(f"Preprocessing {v.id}")
+
+                logging.info(f"Processing {v.id}")
+                self.compute_button.text = _('main.button.processing.user').format(v.id)
+
                 g = process_appointments(a)
                 if not g:
                     # no gaps are found for this user
@@ -470,16 +485,17 @@ class stickyhours(toga.App):
 
         for entry in entries:
             self.result_box.add(
-            toga.Label(
-                entry.name,
-                style=Pack(font_size=FontSize.s.value)))
+                toga.Label(
+                    entry.name,
+                    style=Pack(font_size=FontSize.s.value)))
 
         for day in self.common_gaps_cache.keys():
             if not self.common_gaps_cache.get(day):
                 continue
 
-            self.result_box.add(toga.Label("\n" + format_date(self.common_gaps_cache.get(day)[0][1][0], format='full', locale=lang.lang),
-                                           style=Pack(font_size=FontSize.l.value)))
+            self.result_box.add(toga.Label(
+                "\n" + format_date(self.common_gaps_cache.get(day)[0][1][0], format='full', locale=lang.lang),
+                style=Pack(font_size=FontSize.l.value)))
             for gap in self.common_gaps_cache.get(day):
                 self.result_box.add(toga.Label(
                     f"{gap[1][0].strftime('%H:%M')} - {gap[1][1].strftime('%H:%M')} ({gap[1][1] - gap[1][0]})",
