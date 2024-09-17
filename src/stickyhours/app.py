@@ -452,8 +452,9 @@ class stickyhours(toga.App):
                                               int(self.weeks_amount_input.value), True), timeout=20)
 
                 if not a or a == {}:
+                    done()
                     await self.main_window.error_dialog(_('main.message.no_schedule_user.title'), _('main.message.no_schedule_user.message').format(v.id))
-                    break
+                    return
 
                 logging.info(f"Processing {v.id}")
                 self.compute_button.text = _('main.button.processing.user').format(v.id)
