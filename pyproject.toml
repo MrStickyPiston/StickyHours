@@ -2,7 +2,7 @@
 [tool.briefcase]
 project_name = "StickyHours"
 bundle = "dev.mrstickypiston"
-version = "1.0.0"
+version = "1.0.1"
 url = "https://mrstickypiston.is-a.dev/projects/sticky-hours"
 license.file = "LICENSE"
 author = "MrStickyPiston"
