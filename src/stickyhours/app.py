@@ -462,6 +462,8 @@ class stickyhours(toga.App):
                 g = process_appointments(a)
                 if not g:
                     # no gaps are found for this user
+                    logging.error("No gaps in user, setting gaps to []")
+                    gaps = []
                     break
                 gaps.append(g)
 
