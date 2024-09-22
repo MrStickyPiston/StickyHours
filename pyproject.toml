@@ -1,7 +1,7 @@
 # This project was generated with 0.3.19 using template: https://github.com/beeware/briefcase-template@v0.3.19
 [tool.briefcase]
 project_name = "StickyHours"
-bundle = "dev.mrstickypiston"
+bundle = "io.github.mrstickypiston"
 version = "1.0.1"
 url = "https://mrstickypiston.is-a.dev/projects/sticky-hours"
 license.file = "LICENSE"
@@ -153,6 +153,17 @@ linuxdeploy_plugins = [
 flatpak_runtime = "org.gnome.Platform"
 flatpak_runtime_version = "45"
 flatpak_sdk = "org.gnome.Sdk"
+
+# Disallow default
+finish_arg."filesystem=xdg-cache" = false
+finish_arg."filesystem=xdg-config" = false
+finish_arg."filesystem=xdg-data" = false
+finish_arg."filesystem=xdg-documents" = false
+
+# Allow config directory of app (self.paths.config)
+finish_arg."filesystem=xdg-config/stickyhours" = true
+
+finish_arg."socket=session-bus" = false
 
 [tool.briefcase.app.stickyhours.windows]
 requires = [

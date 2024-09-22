@@ -58,6 +58,8 @@ class stickyhours(toga.App):
         # Main window of the application
         self.main_window = toga.MainWindow(title=self.formal_name)
 
+        print("" + str(self.paths.data) + "" + str(self.paths.config))
+
         # Setup command for logout
         self.account_group = toga.command.Group(
             text=_('command.group.account'),
@@ -73,7 +75,7 @@ class stickyhours(toga.App):
         self.commands.add(self.logout_command)
 
         self.config = configparser.ConfigParser(allow_no_value=True)
-        self.config.read(self.paths.data / 'stickyhours.ini')
+        self.config.read(self.paths.config / 'stickyhours.ini')
 
         if 'user' not in self.config.sections():
             self.config['user'] = {}
@@ -383,9 +385,9 @@ class stickyhours(toga.App):
         self.user_config['token'] = self.zermelo.get_token()
 
         try:
-            self.paths.data.mkdir(parents=True, exist_ok=True)
+            self.paths.config.mkdir(parents=True, exist_ok=True)
 
-            with open(self.paths.data / 'stickyhours.ini', 'w') as f:
+            with open(self.paths.config / 'stickyhours.ini', 'w') as f:
                 self.config.write(f)
         except Exception as e:
             done()
@@ -413,7 +415,7 @@ class stickyhours(toga.App):
         self.user_config['token'] = ''
         self.login_view()
 
-        with open(self.paths.data / 'stickyhours.ini', 'w') as f:
+        with open(self.paths.config / 'stickyhours.ini', 'w') as f:
             self.config.write(f)
 
         logging.info("Logged out")

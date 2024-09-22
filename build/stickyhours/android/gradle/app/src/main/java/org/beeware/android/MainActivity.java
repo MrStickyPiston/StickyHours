@@ -21,7 +21,7 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-import dev.mrstickypiston.stickyhours.R;
+import io.github.mrstickypiston.stickyhours.R;
 
 
 public class MainActivity extends AppCompatActivity {

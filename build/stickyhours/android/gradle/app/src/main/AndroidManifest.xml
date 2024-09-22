@@ -23,7 +23,7 @@
         </activity>
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="dev.mrstickypiston.stickyhours.fileprovider"
+            android:authorities="io.github.mrstickypiston.stickyhours.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

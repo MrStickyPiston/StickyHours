@@ -6,10 +6,10 @@ android {
     // the most recent supported Android release.
     compileSdkVersion 34
 
-    namespace "dev.mrstickypiston.stickyhours"
+    namespace "io.github.mrstickypiston.stickyhours"
 
     defaultConfig {
-        applicationId "dev.mrstickypiston.stickyhours"
+        applicationId "io.github.mrstickypiston.stickyhours"
         versionCode 100
         versionName "0.0.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
