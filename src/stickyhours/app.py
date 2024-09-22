@@ -3,13 +3,16 @@ Easily check for common free hours in zermelo.
 """
 import asyncio
 import logging
+import os
 import time
 import traceback
 from asyncio import timeout
 from enum import Enum
+from pathlib import Path
 from typing import List, Self
 
 import freezegun
+import platformdirs
 import toga
 import configparser
 
@@ -52,13 +55,17 @@ class stickyhours(toga.App):
         self.zermelo = Zermelo()
 
         logging.basicConfig(level=logging.DEBUG)
+        
+    @property
+    def config_dir(self):
+        # Workaround for config path to work with flatpak
+        
+        return Path(platformdirs.PlatformDirs().user_config_dir) / self.app_name
 
     def startup(self):
         logging.info("method startup called")
         # Main window of the application
         self.main_window = toga.MainWindow(title=self.formal_name)
-
-        print("" + str(self.paths.data) + "" + str(self.paths.config))
 
         # Setup command for logout
         self.account_group = toga.command.Group(
@@ -75,7 +82,7 @@ class stickyhours(toga.App):
         self.commands.add(self.logout_command)
 
         self.config = configparser.ConfigParser(allow_no_value=True)
-        self.config.read(self.paths.config / 'stickyhours.ini')
+        self.config.read(self.config_dir / 'stickyhours.ini')
 
         if 'user' not in self.config.sections():
             self.config['user'] = {}
@@ -385,9 +392,10 @@ class stickyhours(toga.App):
         self.user_config['token'] = self.zermelo.get_token()
 
         try:
-            self.paths.config.mkdir(parents=True, exist_ok=True)
+            if not self.config_dir.exists():
+                self.config_dir.mkdir(parents=True, exist_ok=True)
 
-            with open(self.paths.config / 'stickyhours.ini', 'w') as f:
+            with open(self.config_dir / 'stickyhours.ini', 'w') as f:
                 self.config.write(f)
         except Exception as e:
             done()
@@ -415,7 +423,7 @@ class stickyhours(toga.App):
         self.user_config['token'] = ''
         self.login_view()
 
-        with open(self.paths.config / 'stickyhours.ini', 'w') as f:
+        with open(self.config_dir / 'stickyhours.ini', 'w') as f:
             self.config.write(f)
 
         logging.info("Logged out")

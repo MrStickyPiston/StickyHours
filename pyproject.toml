@@ -25,6 +25,7 @@ requires = [
     "requests",
     "pytz",
     "babel",
+    "platformdirs",
     # Remove when no longer in development
     "freezegun"
 ]
@@ -160,8 +161,16 @@ finish_arg."filesystem=xdg-config" = false
 finish_arg."filesystem=xdg-data" = false
 finish_arg."filesystem=xdg-documents" = false
 
+# Wayland is supported by toga
+finish_arg."nosocket=wayland" = false
+finish_arg."socket=wayland" = true
+
+# Fix cant have both X11 and wayland (https://docs.flatpak.org/en/latest/sandbox-permissions.html)
+finish_arg."socket=x11" = false
+finish_arg."socket=fallback-x11" = true
+
 # Allow config directory of app (self.paths.config)
-finish_arg."filesystem=xdg-config/stickyhours" = true
+#finish_arg."filesystem=xdg-config/stickyhours" = true
 
 finish_arg."socket=session-bus" = false
 
