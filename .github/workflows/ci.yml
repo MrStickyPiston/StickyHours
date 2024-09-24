@@ -140,6 +140,15 @@ jobs:
           path: dist
           if-no-files-found: error
 
+      # Flatpak build template for building offline
+      - name: Upload flatpak build template
+        if: matrix.target == 'Flatpak'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Flatpak-build-template
+          path: build/**/linux/flatpak/
+          if-no-files-found: error
+
       - name: Upload Log
         if: failure()
         uses: actions/upload-artifact@v4
