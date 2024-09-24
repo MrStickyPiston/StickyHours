@@ -141,17 +141,20 @@ jobs:
           if-no-files-found: error
 
       # Flatpak build template for building offline
+
+      # To fix
+      - name: Copy out flatpak build template files
+        if: matrix.target == 'Flatpak'
+        run: |
+          cp -a build/**/linux/flatpak/. flatpak-template/
+          rm -rf flatpak-template/build/var
+
       - name: Upload flatpak build template
         if: matrix.target == 'Flatpak'
         uses: actions/upload-artifact@v4
         with:
           name: Flatpak-build-template
-          path: |
-            build/**/linux/flatpak/support/
-            build/**/linux/flatpak/src/
-            build/**/linux/flatpak/io.github.mrstickypiston.stickyhours.desktop
-            build/**/linux/flatpak/icons/
-            build/**/linux/flatpak/build/files/
+          path: flatpak-template/
           if-no-files-found: error
 
       - name: Upload Log
