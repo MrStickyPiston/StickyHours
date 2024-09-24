@@ -147,7 +147,7 @@ jobs:
         with:
           name: Flatpak-build-template
           path: |
-            build/stickyhours/linux/flatpak/
+            build/stickyhours/linux/flatpak/**
             !build/stickyhours/linux/flatpak/build/var/
           if-no-files-found: error
 
