@@ -148,7 +148,7 @@ jobs:
           name: Flatpak-build-template
           path: |
             build/stickyhours/linux/flatpak/
-            !build/stickyhours/linux/flatpak/build/var/run/**
+            !build/stickyhours/linux/flatpak/build/var/run/
           if-no-files-found: error
 
       - name: Upload Log
