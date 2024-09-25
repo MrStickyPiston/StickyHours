@@ -147,6 +147,7 @@ jobs:
         if: matrix.target == 'Flatpak'
         run: |
           cp -a build/**/linux/flatpak/. flatpak-src/
+          cp src/io.github.mrstickypiston.stickyhours.metainfo.xml flatpak-src/
           rm -rf flatpak-src/build/var
 
       - name: Upload flatpak build template
@@ -160,6 +161,7 @@ jobs:
             flatpak-src/io.github.mrstickypiston.stickyhours.desktop
             flatpak-src/icons/
             flatpak-src/build/files/
+            flatpak-src/io.github.mrstickypiston.stickyhours.metainfo.xml
           if-no-files-found: error
 
       - name: Upload Log
