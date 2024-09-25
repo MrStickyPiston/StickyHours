@@ -25,7 +25,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [ "Windows", "macOS", "Ubuntu-24.04", "Fedora-40", "iOS", "Android"]
+        target: [ "Windows", "macOS", "Ubuntu-24.04", "Fedora-40", "iOS", "Android" ]
         include:
           - target: "Windows"
             output-format: "app"
@@ -110,15 +110,15 @@ jobs:
             ${{ matrix.briefcase-args }} \
             ${{ matrix.briefcase-build-args }}
 
-#      - name: Test App
-#        run: |
-#          ${{ matrix.briefcase-run-prefix }} \
-#          briefcase run \
-#            ${{ matrix.platform || matrix.target }} \
-#            ${{ matrix.output-format }} \
-#            --test --no-input --log \
-#            ${{ matrix.briefcase-args }} \
-#            ${{ matrix.briefcase-run-args }}
+      #      - name: Test App
+      #        run: |
+      #          ${{ matrix.briefcase-run-prefix }} \
+      #          briefcase run \
+      #            ${{ matrix.platform || matrix.target }} \
+      #            ${{ matrix.output-format }} \
+      #            --test --no-input --log \
+      #            ${{ matrix.briefcase-args }} \
+      #            ${{ matrix.briefcase-run-args }}
 
       - name: Package App
         run: |
@@ -146,15 +146,20 @@ jobs:
       - name: Copy out flatpak build template files
         if: matrix.target == 'Flatpak'
         run: |
-          cp -a build/**/linux/flatpak/. flatpak-template/
-          rm -rf flatpak-template/build/var
+          cp -a build/**/linux/flatpak/. flatpak-src/
+          rm -rf flatpak-src/build/var
 
       - name: Upload flatpak build template
         if: matrix.target == 'Flatpak'
         uses: actions/upload-artifact@v4
         with:
-          name: Flatpak-build-template
-          path: flatpak-template/
+          name: StickyHours-Flatpak-src
+          path: |
+            flatpak-src/support/
+            flatpak-src/src/
+            flatpak-src/io.github.mrstickypiston.stickyhours.desktop
+            flatpak-src/icons/
+            flatpak-src/build/files/
           if-no-files-found: error
 
       - name: Upload Log
