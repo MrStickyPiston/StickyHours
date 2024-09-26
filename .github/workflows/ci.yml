@@ -156,11 +156,9 @@ jobs:
         with:
           name: StickyHours-Flatpak-src
           path: |
-            flatpak-src/support/
-            flatpak-src/src/
+            flatpak-src/src/app/
             flatpak-src/io.github.mrstickypiston.stickyhours.desktop
             flatpak-src/icons/
-            flatpak-src/build/files/
             flatpak-src/io.github.mrstickypiston.stickyhours.metainfo.xml
           if-no-files-found: error
 
