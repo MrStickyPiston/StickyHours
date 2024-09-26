@@ -8,6 +8,17 @@
     <metadata_license>MIT</metadata_license>
     <project_license>MIT</project_license>
 
+    <categories>
+        <category>Education</category>
+        <category>Utility</category>
+    </categories>
+
+    <keywords>
+        <keyword>Python</keyword>
+        <keyword>Schedules</keyword>
+        <keyword>Zermelo</keyword>
+    </keywords>
+
     <description>
         <p>
             Sticky Hours is an app designed to find common gaps in secondary school schedules. Useful for finding time to speak someone or work on a project. Do note that the app requires that your school uses Zermelo to schedule, and you need access to it. Sticky Hours is an unofficial app  using the Zermelo api and not associated with Zermelo.
