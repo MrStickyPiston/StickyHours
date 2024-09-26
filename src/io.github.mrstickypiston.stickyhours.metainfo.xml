@@ -47,6 +47,17 @@
 
     # Releases
     <releases>
+        <release version="1.0.4" date="2024-09-26">
+            <url type="details">https://github.com/MrStickyPiston/StickyHours/releases/tag/1.0.4</url>
+            <description>
+                <p> Sticky Hours 1.0.4</p>
+                <ul>
+                    <li>Updated flatpak SDK version from org.gnome.Platform//45 to org.gnome.Platform//47</li>
+                    <li>The python in the sdk is now used</li>
+                    <li>The flatpak is now build cleaner</li>
+                </ul>
+            </description>
+        </release>
         <release version="1.0.3" date="2024-09-25">
             <url type="details">https://github.com/MrStickyPiston/StickyHours/releases/tag/1.0.3</url>
             <description>
