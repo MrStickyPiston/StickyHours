@@ -143,14 +143,16 @@ jobs:
       # Flatpak build template for building offline
 
       # To fix
-      - name: Copy out flatpak build template files
+      - name: Copy flatpak build source files
         if: matrix.target == 'Flatpak'
         run: |
           cp -a build/**/linux/flatpak/. flatpak-src/
           cp src/io.github.mrstickypiston.stickyhours.metainfo.xml flatpak-src/
+          mkdir flatpak-src/bootstrap
+          cp src/flatpak-bootstrap/* flatpak-src/bootstrap/
           rm -rf flatpak-src/build/var
 
-      - name: Upload flatpak build template
+      - name: Upload flatpak build source files
         if: matrix.target == 'Flatpak'
         uses: actions/upload-artifact@v4
         with:
@@ -160,6 +162,7 @@ jobs:
             flatpak-src/io.github.mrstickypiston.stickyhours.desktop
             flatpak-src/icons/
             flatpak-src/io.github.mrstickypiston.stickyhours.metainfo.xml
+            flatpak-src/bootstrap
           if-no-files-found: error
 
       - name: Upload Log
