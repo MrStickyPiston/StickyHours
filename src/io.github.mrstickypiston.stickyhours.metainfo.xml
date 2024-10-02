@@ -21,10 +21,17 @@
 
     <description>
         <p>
-            Sticky Hours is an app designed to find common gaps in secondary school schedules. Useful for finding time to speak someone or work on a project. Do note that the app requires that your school uses Zermelo to schedule, and you need access to it. Sticky Hours is an unofficial app  using the Zermelo api and not associated with Zermelo.
+            Sticky Hours is an app designed to find common gaps in secondary school schedules. Useful for finding time to speak someone or work on a project. Do note that the app requires that your school uses Zermelo to schedule, and you need access to it. Sticky Hours is an unofficial app using the Zermelo api and not associated with Zermelo.
         </p>
         <p>
-            See https://mrstickypiston.is-a.dev/projects/sticky-hours#faq-how-to-log-in for help with logging in.
+            For help with logging in, please take a look at the faq on the website.
+        </p>
+        <p>
+            The app uses GTK for the ui, so you can apply any GTK theme to the app. To do that you will need to allow the flatpak to access the GTK themes folder. The GTK themes folder is ~/.themes for user installed themes, or xdg-config/gtk-3.0 for package installed themes. This value will be referenced as INSERT_GTK_THEMES_FOLDER later on.
+            If you installed the flatpak system-wide, run the following command:
+            <code>sudo flatpak override --filesystem=INSERT_GTK_THEMES_FOLDER</code>
+            If installed Sticky Hours for only one user, run
+            <code>flatpak override --user --filesystem=INSERT_GTK_THEMES_FOLDER</code>
         </p>
     </description>
 
@@ -32,28 +39,28 @@
     <screenshots>
         <screenshot type="default" xml:lang="en">
             <image>https://res.cloudinary.com/dvtmkwimv/image/upload/v1727798307/Sticky_Hours_screenshot_main_screen_1_user_dark_mode_flatpak_titlby.png</image>
-            <caption>The main menu with one selected user on dark mode.</caption>
+            <caption>The main menu with one selected user with Breeze-Dark theme</caption>
         </screenshot>
         <screenshot type="default" xml:lang="en">
             <image>https://res.cloudinary.com/dvtmkwimv/image/upload/v1727798303/Sticky_Hours_screenshot_main_screen_2_users_dark_mode_flatpak_gyn3m5.png</image>
-            <caption>The main menu with two selected users on dark mode.</caption>
+            <caption>The main menu with two selected users with Breeze-Dark theme</caption>
         </screenshot>
         <screenshot type="default" xml:lang="en">
             <image>https://res.cloudinary.com/dvtmkwimv/image/upload/v1727798397/Sticky_Hours_screenshot_login_screen_dark_mode_flatpak_twxv1a.png</image>
-            <caption>The login menu on dark mode.</caption>
+            <caption>The login menu with Breeze-Dark theme.</caption>
         </screenshot>
 
         <screenshot type="default" xml:lang="en">
-            <image>https://res.cloudinary.com/dvtmkwimv/image/upload/v1726849209/StickyHours-screenshot-windows-common_hours_menu.png</image>
-            <caption>The main menu with one selected user on light mode.</caption>
+            <image>https://res.cloudinary.com/dvtmkwimv/image/upload/v1727798299/Sticky_Hours_screenshot_main_screen_1_user_light_mode_flatpak_sxhqi1.png</image>
+            <caption>The main menu with one selected user with Breeze theme.</caption>
         </screenshot>
         <screenshot type="default" xml:lang="en">
             <image>https://res.cloudinary.com/dvtmkwimv/image/upload/v1727798312/Sticky_Hours_screenshot_main_screen_2_users_light_mode_flatpak_lmkjah.png</image>
-            <caption>The main menu with two selected users on light mode.</caption>
+            <caption>The main menu with two selected users with Breeze theme.</caption>
         </screenshot>
         <screenshot type="default" xml:lang="en">
             <image>https://res.cloudinary.com/dvtmkwimv/image/upload/v1727797994/Sticky_Hours_screenshot_login_screen_light_mode_flatpak_moqvwc.png</image>
-            <caption>The login menu on light mode.</caption>
+            <caption>The login menu with Breeze theme.</caption>
         </screenshot>
     </screenshots>
 
