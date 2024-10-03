@@ -38,6 +38,19 @@
     <launchable type="desktop-id">io.github.mrstickypiston.stickyhours.desktop</launchable>
     <screenshots>
         <screenshot type="default" xml:lang="en">
+            <image>https://res.cloudinary.com/dvtmkwimv/image/upload/v1727798299/Sticky_Hours_screenshot_main_screen_1_user_light_mode_flatpak_sxhqi1.png</image>
+            <caption>The main menu with one selected user with default settings.</caption>
+        </screenshot>
+        <screenshot type="default" xml:lang="en">
+            <image>https://res.cloudinary.com/dvtmkwimv/image/upload/v1727798312/Sticky_Hours_screenshot_main_screen_2_users_light_mode_flatpak_lmkjah.png</image>
+            <caption>The main menu with two selected users with default settings.</caption>
+        </screenshot>
+        <screenshot type="default" xml:lang="en">
+            <image>https://res.cloudinary.com/dvtmkwimv/image/upload/v1727797994/Sticky_Hours_screenshot_login_screen_light_mode_flatpak_moqvwc.png</image>
+            <caption>The login menu with default settings.</caption>
+        </screenshot>
+
+        <screenshot type="default" xml:lang="en">
             <image>https://res.cloudinary.com/dvtmkwimv/image/upload/v1727798307/Sticky_Hours_screenshot_main_screen_1_user_dark_mode_flatpak_titlby.png</image>
             <caption>The main menu with one selected user with Breeze-Dark theme</caption>
         </screenshot>
@@ -48,19 +61,6 @@
         <screenshot type="default" xml:lang="en">
             <image>https://res.cloudinary.com/dvtmkwimv/image/upload/v1727798397/Sticky_Hours_screenshot_login_screen_dark_mode_flatpak_twxv1a.png</image>
             <caption>The login menu with Breeze-Dark theme.</caption>
-        </screenshot>
-
-        <screenshot type="default" xml:lang="en">
-            <image>https://res.cloudinary.com/dvtmkwimv/image/upload/v1727798299/Sticky_Hours_screenshot_main_screen_1_user_light_mode_flatpak_sxhqi1.png</image>
-            <caption>The main menu with one selected user with Breeze theme.</caption>
-        </screenshot>
-        <screenshot type="default" xml:lang="en">
-            <image>https://res.cloudinary.com/dvtmkwimv/image/upload/v1727798312/Sticky_Hours_screenshot_main_screen_2_users_light_mode_flatpak_lmkjah.png</image>
-            <caption>The main menu with two selected users with Breeze theme.</caption>
-        </screenshot>
-        <screenshot type="default" xml:lang="en">
-            <image>https://res.cloudinary.com/dvtmkwimv/image/upload/v1727797994/Sticky_Hours_screenshot_login_screen_light_mode_flatpak_moqvwc.png</image>
-            <caption>The login menu with Breeze theme.</caption>
         </screenshot>
     </screenshots>
 
@@ -86,6 +86,16 @@
 
     # Releases
     <releases>
+        <release version="1.0.6" date="2024-10-03">
+            <url type="details">https://github.com/MrStickyPiston/StickyHours/releases/tag/1.0.6</url>
+            <description>
+                <p> Sticky Hours 1.0.6</p>
+                <ul>
+                    <li>Fixed when a teacher had a lesson without group it would not show</li>
+                    <li>Fixed the order of gaps in some edge cases</li>
+                </ul>
+            </description>
+        </release>
         <release version="1.0.5" date="2024-09-30">
             <url type="details">https://github.com/MrStickyPiston/StickyHours/releases/tag/1.0.5</url>
             <description>
