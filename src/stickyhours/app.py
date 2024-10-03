@@ -503,14 +503,15 @@ class stickyhours(toga.App):
                     entry.name,
                     style=Pack(font_size=FontSize.s.value)))
 
-        for day in self.common_gaps_cache.keys():
+        for day in sorted(self.common_gaps_cache.keys()):
             if not self.common_gaps_cache.get(day):
                 continue
 
             self.result_box.add(toga.Label(
                 "\n" + format_date(self.common_gaps_cache.get(day)[0][1][0], format='full', locale=lang.lang),
                 style=Pack(font_size=FontSize.l.value)))
-            for gap in self.common_gaps_cache.get(day):
+            sorted_gaps = sorted(self.common_gaps_cache.get(day), key=lambda x: x[1][0])
+            for gap in sorted_gaps:
                 self.result_box.add(toga.Label(
                     f"{gap[1][0].strftime('%H:%M')} - {gap[1][1].strftime('%H:%M')} ({gap[1][1] - gap[1][0]})",
                     style=Pack(font_size=FontSize.s.value)))
