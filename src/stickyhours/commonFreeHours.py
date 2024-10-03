@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 
 import pytz
@@ -5,7 +6,7 @@ import pytz
 from stickyhours.zapi import Zermelo
 
 
-def process_appointments(appointments) -> dict:
+def process_appointments(appointments, user_id) -> dict:
     # Preprocesses the appointments for getting the gaps
     days = {}
     gaps = {}
@@ -18,7 +19,13 @@ def process_appointments(appointments) -> dict:
     for a in appointments:
         # Check if list is empty
         if not a.get('groups'):
-            continue
+
+            if not user_id in a.get('teachers'):
+                logging.info(f'No group for appointment: {a}')
+                logging.info(f'User not in teachers list for this appointment, skipping hour. (subjects: {a.get('subjects')})')
+                continue
+            else:
+                logging.info(f'No group for this appointment but {user_id} is in teachers list: {a}')
 
         s = a["startTimeSlot"]
         e = a["endTimeSlot"]

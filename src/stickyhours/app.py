@@ -42,6 +42,7 @@ lang = Lang()
 _ = lang.translate
 
 
+#@freezegun.freeze_time('05-10-2024')
 class stickyhours(toga.App):
     # For except hook
     instance: Self = None
@@ -469,7 +470,7 @@ class stickyhours(toga.App):
                 logging.info(f"Processing {v.id}")
                 self.compute_button.text = _('main.button.processing.user').format(v.id)
 
-                g = process_appointments(a)
+                g = process_appointments(a, v.id)
                 if not g:
                     # no gaps are found for this user
                     logging.error("No gaps in user, setting gaps to []")
