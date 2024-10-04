@@ -7,12 +7,15 @@ import os
 import time
 import traceback
 from asyncio import timeout
+from datetime import datetime
 from enum import Enum
 from pathlib import Path
+from pprint import pprint
 from typing import List, Self
 
 import freezegun
 import platformdirs
+import pytz
 import toga
 import configparser
 
@@ -21,7 +24,7 @@ from toga.style.pack import COLUMN
 import toga.platform
 
 from stickyhours.lang import Lang
-from .commonFreeHours import get_accounts, process_appointments, get_common_gaps
+from .commonFreeHours import get_accounts, process_user_data, get_common_gaps
 from .accountentry import AccountEntry
 
 from .zapi import *
@@ -51,7 +54,7 @@ class stickyhours(toga.App):
         super().__init__()
         self.main_loaded = False
         self.accounts = []
-        self.common_gaps_cache = {}
+        self.common_gaps_cache: dict[str, list[dict[str, int]]] = {}
 
         self.zermelo = Zermelo()
 
@@ -452,7 +455,7 @@ class stickyhours(toga.App):
                 ids.append(entry.get_value().id)
 
         try:
-            gaps = []
+            processed_appointments = []
 
             for v in set(entries):
                 logging.info(f"Fetching {v.id}")
@@ -470,15 +473,14 @@ class stickyhours(toga.App):
                 logging.info(f"Processing {v.id}")
                 self.compute_button.text = _('main.button.processing.user').format(v.id)
 
-                g = process_appointments(a, v.id)
+                g = process_user_data(a, v.id)
                 if not g:
-                    # no gaps are found for this user
-                    logging.error("No gaps in user, setting gaps to []")
-                    gaps = []
+                    logging.error(f"No valid appointments found for {v.id}")
+                    processed_appointments = []
                     break
-                gaps.append(g)
+                processed_appointments.append(g)
 
-            self.common_gaps_cache = get_common_gaps(*gaps)
+            self.common_gaps_cache = get_common_gaps(processed_appointments)
 
         except asyncio.TimeoutError:
             # Handle timeout
@@ -507,13 +509,32 @@ class stickyhours(toga.App):
             if not self.common_gaps_cache.get(day):
                 continue
 
-            self.result_box.add(toga.Label(
-                "\n" + format_date(self.common_gaps_cache.get(day)[0][1][0], format='full', locale=lang.lang),
-                style=Pack(font_size=FontSize.l.value)))
-            sorted_gaps = sorted(self.common_gaps_cache.get(day), key=lambda x: x[1][0])
+            self.result_box.add(
+                toga.Label(
+                    "\n" + format_date(
+                        datetime.fromisoformat(day),
+                        format='full',
+                        locale=lang.lang
+                    ),
+                    style=Pack(font_size=FontSize.l.value)
+                )
+            )
+
+            sorted_gaps = sorted(self.common_gaps_cache.get(day), key=lambda x: x.get('start_time'))
+
             for gap in sorted_gaps:
+                start = datetime.fromtimestamp(
+                    gap.get('start_time'),
+                    tz=pytz.timezone('Europe/Amsterdam')
+                )
+
+                end = datetime.fromtimestamp(
+                    gap.get('end_time'),
+                    tz=pytz.timezone('Europe/Amsterdam')
+                )
+
                 self.result_box.add(toga.Label(
-                    f"{gap[1][0].strftime('%H:%M')} - {gap[1][1].strftime('%H:%M')} ({gap[1][1] - gap[1][0]})",
+                    f"{start.strftime('%H:%M')} - {end.strftime('%H:%M')} ({end - start})",
                     style=Pack(font_size=FontSize.s.value)))
 
         if not self.common_gaps_cache:

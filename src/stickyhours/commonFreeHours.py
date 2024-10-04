@@ -1,109 +1,200 @@
 import logging
 from datetime import datetime
+from typing import List, TypedDict
 
 import pytz
 
 from stickyhours.zapi import Zermelo
 
+class Appointment(TypedDict):
+    appointmentInstance: int
+    branch: str
+    branchOfSchool: int
+    cancelled: bool
+    changeDescription: str
+    created: int
+    end: int
+    groups: List[str]
+    groupsInDepartments: List[int]
+    hidden: bool
+    id: int
+    lastModified: int
+    locations: List[str]
+    locationsOfBranch: List[int]
+    modified: bool
+    moved: bool
+    new: bool
+    remark: str
+    start: int
+    subjects: List[str]
+    teachers: List[str]
+    type: str
+    valid: bool
 
-def process_appointments(appointments, user_id) -> dict:
-    # Preprocesses the appointments for getting the gaps
-    days = {}
-    gaps = {}
+    endTimeSlot: int
+    endTimeSlotName: str
+    startTimeSlot: int
+    startTimeSlotName: str
 
-    previous_slot = None
-    previous_time = None
 
-    appointments.sort(key=lambda arr: arr.get('start'))
+class Response(TypedDict):
+    data: List[Appointment]
+    details: str
+    endRow: int
+    eventId: int
+    message: str
+    startRow: int
+    status: int
+    totalRows: int
 
-    for a in appointments:
-        # Check if list is empty
-        if not a.get('groups'):
 
-            if not user_id in a.get('teachers'):
-                logging.info(f'No group for appointment: {a}')
-                logging.info(f'User not in teachers list for this appointment, skipping hour. (subjects: {a.get('subjects')})')
-                continue
-            else:
-                logging.info(f'No group for this appointment but {user_id} is in teachers list: {a}')
+class WrappedResponse(TypedDict):
+    response: Response
 
-        s = a["startTimeSlot"]
-        e = a["endTimeSlot"]
 
-        st = datetime.fromtimestamp(a.get('start'), tz=pytz.timezone('Europe/Amsterdam'))
-        et = datetime.fromtimestamp(a.get('end'), tz=pytz.timezone('Europe/Amsterdam'))
+type timeslot = dict[str, int]
 
-        d = str(datetime.fromtimestamp(a.get('start'), tz=pytz.timezone('Europe/Amsterdam')).date())
 
-        if s is None or e is None:
-            print(f"Appointment without start or end timeslot: {a}")
+class ProcessedAppointments(TypedDict):
+    timeslots: dict[str, timeslot]
+    daily_appointments: dict[str, List[Appointment]]
+    days: list[str]
+
+def is_valid_appointment(appointment: Appointment, user_id: str) -> bool:
+    if not appointment.get('groups'):
+
+        if not user_id in appointment.get('teachers'):
+            logging.info(f'No group for appointment: {appointment}')
+            logging.info(
+                f'User not in teachers list for this appointment, skipping hour. (subjects: {appointment.get('subjects')})')
+            return False
+        else:
+            logging.info(f'No group for this appointment but {user_id} is in teachers list: {appointment}')
+
+    return True
+
+
+def process_user_data(appointments: List[Appointment], user_id: str) -> ProcessedAppointments:
+    timeslots: dict[str, dict[str, int]] = {}
+    daily_appointments: dict[str, list[Appointment]] = {}
+
+    for appointment in appointments:
+
+        if not is_valid_appointment(appointment, user_id):
             continue
 
-        if days.get(d) is None:
-            days[d] = []
+        date = str(datetime.fromtimestamp(
+            appointment.get('start'), tz=pytz.timezone('Europe/Amsterdam')).date()
+                   )
 
-        if gaps.get(d) is None:
-            gaps[d] = []
+        if not timeslots.get(date):
+            timeslots[date] = {
+                'start': appointment.get('startTimeSlot'),
+                'end': appointment.get('endTimeSlot')
+            }
 
-        elif previous_slot[1] + 1 < s:
-            gaps[d].append([[previous_slot[1] + 1, s - 1], [previous_time[1], st]])
+        else:
+            timeslots[date]['start'] = min(timeslots[date]['start'], appointment.get('startTimeSlot'))
+            timeslots[date]['end'] = max(timeslots[date]['end'], appointment.get('endTimeSlot'))
 
-        previous_slot = [s, e]
-        previous_time = [st, et]
+        if not daily_appointments.get(date):
+            daily_appointments[date] = []
+
+        daily_appointments[date].append(appointment)
+
+    return {
+        'timeslots': timeslots,
+        'daily_appointments': daily_appointments,
+        'days': list(timeslots.keys())
+    }
+
+def get_common_gaps(data: list[ProcessedAppointments], sticky_hours: int = 0) -> dict[str, list[dict[str, int]]]:
+    common_dates: set = set.intersection(*[set(user_data['days']) for user_data in data])
+    common_dates: list[str] = sorted(list(common_dates))
+
+    merged_days: dict[str, dict] = {}
+
+    # Merge data into dates
+    for date in common_dates:
+        # Process each common date
+        logging.info(f'Processing date: {date}')
+
+        merged_days[date] = {}
+
+        for user_data in data:
+            day = user_data.get('daily_appointments').get(date)
+
+            for appointment in day:
+
+                for i in range(appointment.get('startTimeSlot'), appointment.get('endTimeSlot') + 1):
+                    if not merged_days[date].get(i):
+                        merged_days[date][i] = {
+                            'start': appointment.get('start'),
+                            'end': appointment.get('end')
+                        }
+                    else:
+                        merged_days[date][i]['start'] = min(merged_days[date][i]['start'], appointment.get('start'))
+                        merged_days[date][i]['end'] = max(merged_days[date][i]['end'], appointment.get('end'))
 
 
+    minimum_day_slots: dict[str, dict] = {}
 
-        days[d].append([s, e])
+    for date in common_dates:
+        for user_data in data:
+            slot = user_data.get('timeslots').get(date)
+
+            if not minimum_day_slots.get(date):
+                minimum_day_slots[date] = slot
+            else:
+                minimum_day_slots[date]['start'] = max(minimum_day_slots[date]['start'], slot['start'])
+                minimum_day_slots[date]['end'] = min(minimum_day_slots[date]['end'], slot['end'])
+
+    gaps: dict[str, list[dict[str, int]]] = {}
+
+    for date in sorted(merged_days.keys()):
+        logging.info(f'Processing common gaps: {date}')
+        previous_slot_number: int | None = None
+        for slot_number in sorted(merged_days[date].keys()):
+
+            if previous_slot_number is None:
+                pass
+            elif slot_number - previous_slot_number > 1:
+
+                start_slot = previous_slot_number + 1
+                end_slot = slot_number - 1
+
+                logging.info(f'Gap found at slot {start_slot} - {end_slot}')
+
+                # Make sure the gap is not outside the minimum day slots
+                if not minimum_day_slots[date]['start'] - sticky_hours <= start_slot:
+                    logging.info(f'Gap start {start_slot} is lower than minimum {minimum_day_slots[date]['start'] - sticky_hours} on date {date}')
+                    continue
+                if not start_slot <= minimum_day_slots[date]['end'] + sticky_hours:
+                    logging.info(f'Gap start {start_slot} is higher than maximum {minimum_day_slots[date]['end'] + sticky_hours} on date {date}')
+                    continue
+
+                if not minimum_day_slots[date]['start'] - sticky_hours <= end_slot:
+                    logging.info(
+                        f'Gap end {end_slot} is lower than minimum {minimum_day_slots[date]['start'] - sticky_hours} on date {date}')
+                    continue
+                if not end_slot <= minimum_day_slots[date]['end'] + sticky_hours:
+                    logging.info(
+                        f'Gap end {end_slot} is higher than maximum {minimum_day_slots[date]['end'] + sticky_hours} on date {date}')
+                    continue
+
+                if not gaps.get(date):
+                    gaps[date] = []
+
+                gaps[date].append({
+                    'start_slot': start_slot,
+                    'end_slot': end_slot,
+                    'start_time': merged_days[date][previous_slot_number]['end'],
+                    'end_time': merged_days[date][slot_number]['start']
+                })
+
+            previous_slot_number = slot_number
+
     return gaps
-
-def get_common_gaps(*gaps) -> dict[list] | dict:
-    # Returns common gaps between gap lists in a days dict
-    # UNSORTED!
-
-    common_gaps = {}
-
-    if len(gaps) == 0:
-        return common_gaps
-
-    elif len(gaps) == 1:
-        for date in gaps[0].keys():
-            for gap in gaps[0].get(date):
-                if common_gaps.get(date) is None:
-                    common_gaps[date] = []
-                common_gaps.get(date).append(gap)
-        return common_gaps
-
-    # Convert tuple to list
-    gaps_list = list(gaps)
-
-    # Start with the first gap
-    result = gaps_list[0]
-
-    # Iterate through the remaining gaps
-    for i in range(1, len(gaps_list)):
-        new_common_gaps = {}
-        gaps_b = gaps_list[i]
-
-        # Iter through all days
-        for date in set(result.keys()).union(set(gaps_b.keys())):
-            if not result.get(date) or not gaps_b.get(date):
-                continue
-            for gap_a in result.get(date):
-                for gap_b in gaps_b.get(date):
-                    overlap_start_slot = max(gap_a[0][0], gap_b[0][0])
-                    overlap_end_slot = min(gap_a[0][1], gap_b[0][1])
-
-                    if overlap_start_slot <= overlap_end_slot:
-                        # Create day if it does not exist
-                        if new_common_gaps.get(date) is None:
-                            new_common_gaps[date] = []
-
-                        # Add gap to list
-                        new_common_gaps[date].append([[overlap_start_slot, overlap_end_slot], [max(gap_a[1][0], gap_b[1][0]), min(gap_a[1][1], gap_b[1][1])]])
-
-        result = new_common_gaps
-
-    return result
 
 def get_accounts(zermelo: Zermelo, school_year: int):
     students = zermelo.get_students(school_year)
