@@ -65,7 +65,8 @@ class Lang:
                                  'error.other.message': 'Something went wrong. Please report the error '
                                                         'below to the issue tracker.',
                                  'error.other.title': 'Unexpected error',
-                                 'error.timeout.message': 'Could not fetch the api data in time. Please try again.',
+                                 'error.timeout.message': 'Could not fetch the api data in time. Please '
+                                                          'try again.',
                                  'error.timeout.title': 'Error: api request timed out',
                                  'error.window.error_below': 'See the error below:',
                                  'error.window.title': 'Errors',
@@ -77,13 +78,18 @@ class Lang:
                                  'main.button.processing.user': 'Processing user {}',
                                  'main.button.remove_entry': 'Remove user',
                                  'main.label.entries': 'Users',
+                                 'main.label.sticky_amount': 'Amount of sticky hours',
                                  'main.label.weeks_amount': 'Amount of weeks',
                                  'main.message.no_schedule_user.message': 'User {} has no schedule '
                                                                           'available.',
                                  'main.message.no_schedule_user.title': 'No schedule found for user.',
                                  'main.placeholder.filter_entry': 'Filter users...',
                                  'main.results.header': 'Common free hours',
-                                 'main.results.none': 'No common free hours found.'},
+                                 'main.results.none': 'No common free hours found.',
+                                 'main.results.options.header': 'Options',
+                                 'main.results.sticky_amount': 'Amount of sticky hours: {}',
+                                 'main.results.users.header': 'Users',
+                                 'main.results.weeks_amount': 'Amount of weeks in future: {}'},
                           'nl': {'auth.button.help': 'Hulp met inloggen',
                                  'auth.button.idle': 'Log in',
                                  'auth.button.progress': 'Aan het inloggen...',
@@ -125,7 +131,8 @@ class Lang:
                                  'error.other.message': 'Er is iets misgegaan. Rapporteer deze fout op '
                                                         'de issuetracker.',
                                  'error.other.title': 'Onverwachte fout',
-                                 'error.timeout.message': 'Kon de data niet op tijd ophalen van de API. Probeer het later nog eens.',
+                                 'error.timeout.message': 'Kon de data niet op tijd ophalen van de API. '
+                                                          'Probeer het later nog eens.',
                                  'error.timeout.title': 'Error: verzoek aan api duurt te lang',
                                  'error.window.error_below': 'Zie de fout hieronder:',
                                  'error.window.title': 'Fouten',
@@ -137,13 +144,18 @@ class Lang:
                                  'main.button.processing.user': 'Gebruiker {} verwerken',
                                  'main.button.remove_entry': 'Gebruiker verwijderen',
                                  'main.label.entries': 'Gebruikers',
+                                 'main.label.sticky_amount': 'Aantal sticky hours',
                                  'main.label.weeks_amount': 'Aantal weken',
                                  'main.message.no_schedule_user.message': 'Geen rooster gevonden voor '
                                                                           'gebruiker {}.',
                                  'main.message.no_schedule_user.title': 'Geen rooster gevonden',
                                  'main.placeholder.filter_entry': 'Gebruikers filteren...',
                                  'main.results.header': 'Gezamelijke tussenuren',
-                                 'main.results.none': 'Geen gezamelijke tussenuren.'}}
+                                 'main.results.none': 'Geen gezamelijke tussenuren.',
+                                 'main.results.options.header': 'Opties',
+                                 'main.results.sticky_amount': 'Aantal sticky hours: {}',
+                                 'main.results.users.header': 'Gebruikers',
+                                 'main.results.weeks_amount': 'Aantal weken in de toekomst: {}'}}
 
         print(f'Detected language {self.lang}')
 

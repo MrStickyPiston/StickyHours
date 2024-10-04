@@ -7,12 +7,15 @@ import os
 import time
 import traceback
 from asyncio import timeout
+from datetime import datetime
 from enum import Enum
 from pathlib import Path
+from pprint import pprint
 from typing import List, Self
 
 import freezegun
 import platformdirs
+import pytz
 import toga
 import configparser
 
@@ -21,7 +24,7 @@ from toga.style.pack import COLUMN
 import toga.platform
 
 from stickyhours.lang import Lang
-from .commonFreeHours import get_accounts, process_appointments, get_common_gaps
+from .commonFreeHours import get_accounts, process_user_data, get_common_gaps
 from .accountentry import AccountEntry
 
 from .zapi import *
@@ -42,6 +45,7 @@ lang = Lang()
 _ = lang.translate
 
 
+#@freezegun.freeze_time('05-10-2024')
 class stickyhours(toga.App):
     # For except hook
     instance: Self = None
@@ -50,7 +54,7 @@ class stickyhours(toga.App):
         super().__init__()
         self.main_loaded = False
         self.accounts = []
-        self.common_gaps_cache = {}
+        self.common_gaps_cache: dict[str, list[dict[str, int]]] = {}
 
         self.zermelo = Zermelo()
 
@@ -201,6 +205,9 @@ class stickyhours(toga.App):
         weeks_amount_label = toga.Label(text=_('main.label.weeks_amount'), style=Pack(font_size=FontSize.xl.value))
         self.weeks_amount_input = toga.Selection(items=[1, 2, 3, 4, 5])
 
+        sticky_amount_label = toga.Label(text=_('main.label.sticky_amount'), style=Pack(font_size=FontSize.xl.value))
+        self.sticky_amount_input = toga.Selection(items=[0, 1, 2, 3, 4])
+
         self.compute_button = toga.Button(_('main.button.idle'), on_press=self.compute, style=utils.button_style)
 
         self.result_box = toga.Box(style=Pack(direction=COLUMN, padding=(0, 5)))
@@ -212,6 +219,9 @@ class stickyhours(toga.App):
 
         main_box.add(weeks_amount_label)
         main_box.add(self.weeks_amount_input)
+
+        main_box.add(sticky_amount_label)
+        main_box.add(self.sticky_amount_input)
 
         main_box.add(self.compute_button)
 
@@ -451,7 +461,7 @@ class stickyhours(toga.App):
                 ids.append(entry.get_value().id)
 
         try:
-            gaps = []
+            processed_appointments = []
 
             for v in set(entries):
                 logging.info(f"Fetching {v.id}")
@@ -469,15 +479,14 @@ class stickyhours(toga.App):
                 logging.info(f"Processing {v.id}")
                 self.compute_button.text = _('main.button.processing.user').format(v.id)
 
-                g = process_appointments(a)
+                g = process_user_data(a, v.id)
                 if not g:
-                    # no gaps are found for this user
-                    logging.error("No gaps in user, setting gaps to []")
-                    gaps = []
+                    logging.error(f"No valid appointments found for {v.id}")
+                    processed_appointments = []
                     break
-                gaps.append(g)
+                processed_appointments.append(g)
 
-            self.common_gaps_cache = get_common_gaps(*gaps)
+            self.common_gaps_cache = get_common_gaps(processed_appointments, sticky_hours=self.sticky_amount_input.value)
 
         except asyncio.TimeoutError:
             # Handle timeout
@@ -494,24 +503,63 @@ class stickyhours(toga.App):
         self.result_box.clear()
 
         self.result_box.add(
-            toga.Label(_('main.results.header'), style=Pack(font_size=FontSize.xl.value)))
+            toga.Label(_('main.results.header'), style=Pack(font_size=FontSize.xl.value)),
+            toga.Label(
+                "\n" + _('main.results.options.header'),
+                style=Pack(font_size=FontSize.l.value)
+            ),
+            toga.Label(
+                "\n" + _('main.results.weeks_amount').format(self.weeks_amount_input.value),
+                style=Pack(font_size=FontSize.s.value)
+            ),
+            toga.Label(
+                _('main.results.sticky_amount').format(self.sticky_amount_input.value),
+                style=Pack(font_size=FontSize.s.value)
+            ),
+            toga.Label(
+                "\n" + _('main.results.users.header'),
+                style=Pack(font_size=FontSize.l.value)
+            )
+        )
 
         for entry in entries:
             self.result_box.add(
                 toga.Label(
                     entry.name,
-                    style=Pack(font_size=FontSize.s.value)))
+                    style=Pack(font_size=FontSize.s.value)
+                )
+            )
 
-        for day in self.common_gaps_cache.keys():
+        for day in sorted(self.common_gaps_cache.keys()):
             if not self.common_gaps_cache.get(day):
                 continue
 
-            self.result_box.add(toga.Label(
-                "\n" + format_date(self.common_gaps_cache.get(day)[0][1][0], format='full', locale=lang.lang),
-                style=Pack(font_size=FontSize.l.value)))
-            for gap in self.common_gaps_cache.get(day):
+            self.result_box.add(
+                toga.Label(
+                    "\n" + format_date(
+                        datetime.fromisoformat(day),
+                        format='full',
+                        locale=lang.lang
+                    ),
+                    style=Pack(font_size=FontSize.l.value)
+                )
+            )
+
+            sorted_gaps = sorted(self.common_gaps_cache.get(day), key=lambda x: x.get('start_time'))
+
+            for gap in sorted_gaps:
+                start = datetime.fromtimestamp(
+                    gap.get('start_time'),
+                    tz=pytz.timezone('Europe/Amsterdam')
+                )
+
+                end = datetime.fromtimestamp(
+                    gap.get('end_time'),
+                    tz=pytz.timezone('Europe/Amsterdam')
+                )
+
                 self.result_box.add(toga.Label(
-                    f"{gap[1][0].strftime('%H:%M')} - {gap[1][1].strftime('%H:%M')} ({gap[1][1] - gap[1][0]})",
+                    f"{start.strftime('%H:%M')} - {end.strftime('%H:%M')} ({end - start})",
                     style=Pack(font_size=FontSize.s.value)))
 
         if not self.common_gaps_cache:
