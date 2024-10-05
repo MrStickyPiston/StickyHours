@@ -202,11 +202,28 @@ class stickyhours(toga.App):
 
         add_entry_button = toga.Button(_('main.button.add_entry'), on_press=self.add_entry, style=utils.button_style)
 
-        weeks_amount_label = toga.Label(text=_('main.label.weeks_amount'), style=Pack(font_size=FontSize.xl.value))
-        self.weeks_amount_input = toga.Selection(items=[1, 2, 3, 4, 5])
+        weeks_amount_label = toga.Label(text=_('main.label.options'), style=Pack(font_size=FontSize.xl.value))
+        self.weeks_amount_input = toga.Selection(
+            items=[
+                {'amount': 1, 'text': _('main.selection.weeks_amount.current')},
+                {'amount': 2, 'text': _('main.selection.weeks_amount').format(2)},
+                {'amount': 3, 'text': _('main.selection.weeks_amount').format(3)},
+                {'amount': 4, 'text': _('main.selection.weeks_amount').format(4)},
+                {'amount': 5, 'text': _('main.selection.weeks_amount').format(5)},
+            ],
+            accessor='text')
 
-        sticky_amount_label = toga.Label(text=_('main.label.sticky_amount'), style=Pack(font_size=FontSize.xl.value))
-        self.sticky_amount_input = toga.Selection(items=[0, 1, 2, 3, 4])
+        self.sticky_amount_input = toga.Selection(
+            items=[
+                {'amount': 0, 'text': _('main.selection.sticky_amount.none')},
+                {'amount': 1, 'text': _('main.selection.sticky_amount.one')},
+                {'amount': 2, 'text': _('main.selection.sticky_amount').format(2)},
+                {'amount': 3, 'text': _('main.selection.sticky_amount').format(3)},
+                {'amount': 4, 'text': _('main.selection.sticky_amount').format(4)},
+                {'amount': 5, 'text': _('main.selection.sticky_amount').format(5)},
+            ],
+            accessor='text'
+        )
 
         self.compute_button = toga.Button(_('main.button.idle'), on_press=self.compute, style=utils.button_style)
 
@@ -220,7 +237,6 @@ class stickyhours(toga.App):
         main_box.add(weeks_amount_label)
         main_box.add(self.weeks_amount_input)
 
-        main_box.add(sticky_amount_label)
         main_box.add(self.sticky_amount_input)
 
         main_box.add(self.compute_button)
@@ -469,7 +485,7 @@ class stickyhours(toga.App):
 
                 a = await asyncio.wait_for(
                     self.loop.run_in_executor(None, self.zermelo.get_current_weeks_appointments, v.id, v.teacher,
-                                              int(self.weeks_amount_input.value), True), timeout=20)
+                                              int(self.weeks_amount_input.value.amount), True), timeout=20)
 
                 if not a or a == {}:
                     done()
@@ -486,7 +502,7 @@ class stickyhours(toga.App):
                     break
                 processed_appointments.append(g)
 
-            self.common_gaps_cache = get_common_gaps(processed_appointments, sticky_hours=self.sticky_amount_input.value)
+            self.common_gaps_cache = get_common_gaps(processed_appointments, sticky_hours=self.sticky_amount_input.value.amount)
 
         except asyncio.TimeoutError:
             # Handle timeout
@@ -503,23 +519,7 @@ class stickyhours(toga.App):
         self.result_box.clear()
 
         self.result_box.add(
-            toga.Label(_('main.results.header'), style=Pack(font_size=FontSize.xl.value)),
-            toga.Label(
-                "\n" + _('main.results.options.header'),
-                style=Pack(font_size=FontSize.l.value)
-            ),
-            toga.Label(
-                "\n" + _('main.results.weeks_amount').format(self.weeks_amount_input.value),
-                style=Pack(font_size=FontSize.s.value)
-            ),
-            toga.Label(
-                _('main.results.sticky_amount').format(self.sticky_amount_input.value),
-                style=Pack(font_size=FontSize.s.value)
-            ),
-            toga.Label(
-                "\n" + _('main.results.users.header'),
-                style=Pack(font_size=FontSize.l.value)
-            )
+            toga.Label(_('main.results.header'), style=Pack(font_size=FontSize.xl.value))
         )
 
         for entry in entries:
