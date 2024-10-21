@@ -86,6 +86,15 @@
 
     # Releases
     <releases>
+        <release version="1.1.1" date="2024-10-21">
+            <url type="details">https://github.com/MrStickyPiston/StickyHours/releases/tag/1.1.1</url>
+            <description>
+                <p> Sticky Hours 1.1.1</p>
+                <ul>
+                    <li>Performance optimizations</li>
+                </ul>
+            </description>
+        </release>
         <release version="1.1.0" date="2024-10-05">
             <url type="details">https://github.com/MrStickyPiston/StickyHours/releases/tag/1.1.0</url>
             <description>
