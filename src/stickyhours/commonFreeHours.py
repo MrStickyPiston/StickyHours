@@ -197,8 +197,15 @@ def get_common_gaps(data: list[ProcessedAppointments], sticky_hours: int = 0) ->
     return gaps
 
 def get_accounts(zermelo: Zermelo, school_year: int):
-    students = zermelo.get_students(school_year)
-    teachers = zermelo.get_teachers(school_year)
+
+    use_student_names = (not zermelo.get_user().get('isStudent') and zermelo.get_settings().get('employeeCanViewOwnSchedule')) or zermelo.get_settings().get('studentCanViewProjectNames')
+
+    teachers = zermelo.get_teachers(school_year, fields='prefix,lastName,code')
+
+    if use_student_names:
+        students = zermelo.get_students(school_year, fields='firstName,prefix,lastName,code')
+    else:
+        students = zermelo.get_students(school_year, fields='code')
 
     accounts = []
 
@@ -209,7 +216,7 @@ def get_accounts(zermelo: Zermelo, school_year: int):
     for student in students:
         name = []
 
-        if not zermelo.get_user().get('isStudent') or zermelo.get_settings().get('studentCanViewProjectNames'):
+        if use_student_names:
             # can use student names
             name.append(student.get('firstName'))
 

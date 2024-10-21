@@ -45,7 +45,7 @@ lang = Lang()
 _ = lang.translate
 
 
-#@freezegun.freeze_time('05-10-2024')
+#@freezegun.freeze_time('17-10-2024')
 class stickyhours(toga.App):
     # For except hook
     instance: Self = None

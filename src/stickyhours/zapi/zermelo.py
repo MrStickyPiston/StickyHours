@@ -101,7 +101,7 @@ class Zermelo:
 
         return d.get('data')[0]
 
-    def get_appointments(self, start: int, end: int, user: str, is_teacher: bool = False, valid_only: bool = True):
+    def get_appointments(self, start: float, end: float, fields: str, user: str, is_teacher: bool = False, valid_only: bool = True):
         # Gets the raw schedule from the api
 
         self.logger.info("method get_appointments called")
@@ -115,7 +115,8 @@ class Zermelo:
         params = {
             'start': int(start),
             'end': int(end),
-            'teachers' if (is_teacher) else 'possibleStudents': user
+            'teachers' if (is_teacher) else 'possibleStudents': user,
+            'fields': fields
         }
 
         if valid_only:
@@ -137,7 +138,7 @@ class Zermelo:
             raise ZermeloApiDataException('No response data in appointments request.')
 
     def get_current_weeks_appointments(self, user: str, is_teacher: bool = False, weeks: int = 1,
-                                       valid_only: bool = False, fix_403: bool = True,
+                                       valid_only: bool = False, fix_403: bool = True, fields='groups,start,end,startTimeSlot,endTimeSlot,teachers',
                                        max_weeks_optimization: bool = True, max_weeks_optimization_original_weeks: int = None):
         self.logger.info("method get_current_weeks_appointments called")
 
@@ -156,7 +157,7 @@ class Zermelo:
         end = start + timedelta(days=6 + 7 * (weeks - 1), hours=23, minutes=59, seconds=59)
 
         try:
-            appointments = self.get_appointments(start.timestamp(), end.timestamp(), user, is_teacher, valid_only)
+            appointments = self.get_appointments(start.timestamp(), end.timestamp(), fields, user, is_teacher, valid_only)
 
             if weeks != max_weeks_optimization_original_weeks:
                 self.max_appointment_weeks = weeks
@@ -171,7 +172,7 @@ class Zermelo:
                 else:
                     weeks -= 1
 
-                return self.get_current_weeks_appointments(user, is_teacher, weeks, valid_only, True,
+                return self.get_current_weeks_appointments(user, is_teacher, weeks, valid_only, True, fields,
                                                            max_weeks_optimization, max_weeks_optimization_original_weeks)
             else:
                 raise e

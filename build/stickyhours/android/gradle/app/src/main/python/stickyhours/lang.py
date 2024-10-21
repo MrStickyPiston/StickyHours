@@ -1,5 +1,6 @@
 import re
 import string
+from pathlib import Path
 from pprint import pprint
 
 from stickyhours import utils
@@ -78,18 +79,18 @@ class Lang:
                                  'main.button.processing.user': 'Processing user {}',
                                  'main.button.remove_entry': 'Remove user',
                                  'main.label.entries': 'Users',
-                                 'main.label.sticky_amount': 'Amount of sticky hours',
-                                 'main.label.weeks_amount': 'Amount of weeks',
+                                 'main.label.options': 'Options',
                                  'main.message.no_schedule_user.message': 'User {} has no schedule '
                                                                           'available.',
                                  'main.message.no_schedule_user.title': 'No schedule found for user.',
                                  'main.placeholder.filter_entry': 'Filter users...',
                                  'main.results.header': 'Common free hours',
                                  'main.results.none': 'No common free hours found.',
-                                 'main.results.options.header': 'Options',
-                                 'main.results.sticky_amount': 'Amount of sticky hours: {}',
-                                 'main.results.users.header': 'Users',
-                                 'main.results.weeks_amount': 'Amount of weeks in future: {}'},
+                                 'main.selection.sticky_amount': '{} Sticky Hours',
+                                 'main.selection.sticky_amount.none': 'No Sticky Hours',
+                                 'main.selection.sticky_amount.one': '1 Sticky Hour',
+                                 'main.selection.weeks_amount': 'Up to {} weeks in the future',
+                                 'main.selection.weeks_amount.current': 'Only this week'},
                           'nl': {'auth.button.help': 'Hulp met inloggen',
                                  'auth.button.idle': 'Log in',
                                  'auth.button.progress': 'Aan het inloggen...',
@@ -144,18 +145,18 @@ class Lang:
                                  'main.button.processing.user': 'Gebruiker {} verwerken',
                                  'main.button.remove_entry': 'Gebruiker verwijderen',
                                  'main.label.entries': 'Gebruikers',
-                                 'main.label.sticky_amount': 'Aantal sticky hours',
-                                 'main.label.weeks_amount': 'Aantal weken',
+                                 'main.label.options': 'Instellingen',
                                  'main.message.no_schedule_user.message': 'Geen rooster gevonden voor '
                                                                           'gebruiker {}.',
                                  'main.message.no_schedule_user.title': 'Geen rooster gevonden',
                                  'main.placeholder.filter_entry': 'Gebruikers filteren...',
                                  'main.results.header': 'Gezamelijke tussenuren',
                                  'main.results.none': 'Geen gezamelijke tussenuren.',
-                                 'main.results.options.header': 'Opties',
-                                 'main.results.sticky_amount': 'Aantal sticky hours: {}',
-                                 'main.results.users.header': 'Gebruikers',
-                                 'main.results.weeks_amount': 'Aantal weken in de toekomst: {}'}}
+                                 'main.selection.sticky_amount': '{} Sticky Hours',
+                                 'main.selection.sticky_amount.none': 'Geen Sticky Hours',
+                                 'main.selection.sticky_amount.one': '1 Sticky Hour',
+                                 'main.selection.weeks_amount': 'Tot {} weken in de toekomst',
+                                 'main.selection.weeks_amount.current': 'Alleen deze week'}}
 
         print(f'Detected language {self.lang}')
 
