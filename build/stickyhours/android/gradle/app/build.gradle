@@ -10,8 +10,8 @@ android {
 
     defaultConfig {
         applicationId "io.github.mrstickypiston.stickyhours"
-        versionCode 010101
-        versionName "1.1.1"
+        versionCode 010102
+        versionName "1.1.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         // Briefcase currently requires API Level 24 for the `pidof` command, and the `--pid`
