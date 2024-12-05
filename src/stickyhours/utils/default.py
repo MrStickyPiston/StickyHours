@@ -1,4 +1,5 @@
 import locale
+import logging
 import string
 import webbrowser
 
@@ -18,4 +19,7 @@ def open_url(url: string):
 
 
 def get_locale():
-    return locale.getlocale()[0].split('_')[0]
+    try:
+        return locale.getlocale()[0].split('_')[0]
+    except locale.Error as e:
+        logging.error("Failed to get locale: ", e)
