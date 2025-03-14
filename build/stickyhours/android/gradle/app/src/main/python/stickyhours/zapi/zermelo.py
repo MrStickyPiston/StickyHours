@@ -115,7 +115,7 @@ class Zermelo:
         params = {
             'start': int(start),
             'end': int(end),
-            'teachers' if (is_teacher) else 'possibleStudents': user,
+            'user': user,
             'fields': fields
         }
 
@@ -310,12 +310,15 @@ class Zermelo:
                     self.logger.error(f"Instance {instance_id} does not exist.")
                     raise ZermeloValueError(f"Incorrect instance id: {instance_id}")
 
+                if r.status_code == 401:
+                    raise ZermeloAuthException(f"Invalid token: {token} for instance {instance_id}")
+
                 raise ZermeloApiHttpStatusException(r.status_code, r.text)
 
             if expires_seconds - now_seconds > min_seconds_left:
                 self.logger.info(f"Token expires in {timedelta(seconds=expires_seconds - now_seconds)}")
                 return True
-            self.logger.info(f"Expired token: {token}")
+            self.logger.info(f"Nearly expired token: {token}")
             return False
 
         except (AttributeError, IndexError, json.decoder.JSONDecodeError) as e:

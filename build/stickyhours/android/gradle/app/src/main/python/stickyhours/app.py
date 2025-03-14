@@ -87,6 +87,7 @@ class stickyhours(toga.App):
 
         self.config = configparser.ConfigParser(allow_no_value=True)
         self.config.read(self.config_dir / 'stickyhours.ini')
+        logging.info(f"Read config from: {self.config_dir}")
 
         if 'user' not in self.config.sections():
             self.config['user'] = {}

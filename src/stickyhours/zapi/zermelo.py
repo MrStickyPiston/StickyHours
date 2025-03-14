@@ -115,7 +115,7 @@ class Zermelo:
         params = {
             'start': int(start),
             'end': int(end),
-            'teachers' if (is_teacher) else 'possibleStudents': user,
+            'user': user,
             'fields': fields
         }
 

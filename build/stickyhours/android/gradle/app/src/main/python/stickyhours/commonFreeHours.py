@@ -61,6 +61,10 @@ class ProcessedAppointments(TypedDict):
     days: list[str]
 
 def is_valid_appointment(appointment: Appointment, user_id: str) -> bool:
+    if not appointment.get('startTimeSlot') or not appointment.get('endTimeSlot'):
+        logging.warning(f"No start and/or end timeslot for appointment: {appointment}")
+        return False
+
     if not appointment.get('groups'):
 
         if not user_id in appointment.get('teachers'):
